@@ -1,0 +1,66 @@
+---
+title: "Writing Functions with the {tidyverse}"
+author: "Jessica A. Lavery & Daniel D. Sjoberg"
+date: "April 27, 2021"
+output:
+  xaringan::moon_reader:
+    css: [xaringan-themer.css, custom.css]
+    lib_dir: libs
+    seal: false
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: 16:9
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+
+set.seed(78987)
+library(xaringanthemer)
+library(tidyverse)
+
+style_mono_accent(
+  base_color = mskRvis::msk_palette("main")[1]
+)
+
+# xaringan::inf_mr() 
+options(htmltools.dir.version = FALSE) 
+```
+
+```{r xaringanExtra-freezeframe, echo=FALSE}
+xaringanExtra::use_freezeframe()
+```
+
+class: inverse, center, title-slide, middle
+
+# Writing Functions with the {tidyverse}
+
+### Jessica A. Lavery & Daniel D. Sjoberg
+
+#### February 8, 2021
+
+
+<p align="center"><img src="Images/White-Transparent.png" width=30%></p>
+
+.medium[
+`r icons::fontawesome("twitter") %>% icons::icon_style(fill = "#FFFFFF")` @jessicalavs @statistishdan
+`r icons::fontawesome("github")  %>% icons::icon_style(fill = "#FFFFFF")` @jalavery @ddsjoberg
+]
+
+
+---
+```{r child='01-background.Rmd'}
+```
+
+
+---
+```{r child='02-using-tidyverse-fns.Rmd'}
+```
+
+
+---
+```{r child='03-writing-tidyverse-fns.Rmd'}
+```
+
