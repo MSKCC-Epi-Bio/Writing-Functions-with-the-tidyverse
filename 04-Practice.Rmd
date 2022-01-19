@@ -4,8 +4,28 @@ class: inverse, center, middle
 ---
 # Let's Practice
 
+Write a function that accepts a data frame, an unquoted variable name as arguments, and returns the column's mean.
+
+- Use `{{ }}` to capture the input
+
 ```{r, eval = FALSE}
-my_select(data, ...) {
-  # <add your code here>
+my_mean(data, variable) {
+  data %>% dplyr::pull() %>% mean()
+}
+```
+
+- Convert unquoted variable name to a string and implement using `.data` + `dplyr:summarize()`
+
+```{r, eval = FALSE}
+my_mean(data, variable) {
+  variable_chr <- ()
+}
+```
+
+- Convert unquoted variable name to a string and implement directly in `mean()`
+
+```{r, eval = FALSE}
+my_mean(data, variable) {
+  variable_chr <- ()
 }
 ```

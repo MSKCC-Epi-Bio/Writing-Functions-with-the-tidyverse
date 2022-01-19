@@ -48,6 +48,7 @@ class: inverse, center, title-slide, middle
 class: inverse, center, middle
 # Using tidyverse-style Functions
 
+---
 # Background
 
 
@@ -157,7 +158,7 @@ my_mean(mtcars, cyl, am)
 ---
 # Can I avoid `{{ · }}` and `!!enquo(·)`?
 
-* YES (almost)!
+* YES! (mostly)
 
 * Immediately convert inputs into column name **strings**, and utilize all the what you learned in the first portion of this presentation.
 
@@ -185,10 +186,32 @@ class: inverse, center, middle
 ---
 # Let's Practice
 
+Write a function that accepts a data frame, an unquoted variable name as arguments, and returns the column's mean.
+
+- Use `{{ }}` to capture the input
+
 
 ```r
-my_select(data, ...) {
-  # &lt;add your code here&gt;
+my_mean(data, variable) {
+  data %&gt;% dplyr::pull() %&gt;% mean()
+}
+```
+
+- Convert unquoted variable name to a string and implement using `.data` + `dplyr:summarize()`
+
+
+```r
+my_mean(data, variable) {
+  variable_chr &lt;- ()
+}
+```
+
+- Convert unquoted variable name to a string and implement directly in `mean()`
+
+
+```r
+my_mean(data, variable) {
+  variable_chr &lt;- ()
 }
 ```
 

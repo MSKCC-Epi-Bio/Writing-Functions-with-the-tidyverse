@@ -97,7 +97,7 @@ my_mean(mtcars, cyl, am)
 ---
 # Can I avoid `{{ · }}` and `!!enquo(·)`?
 
-* YES (almost)!
+* YES! (mostly)
 
 * Immediately convert inputs into column name **strings**, and utilize all the what you learned in the first portion of this presentation.
 

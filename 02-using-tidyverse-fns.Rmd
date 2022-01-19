@@ -1,5 +1,6 @@
 class: inverse, center, middle
 # Using tidyverse-style Functions
 
+---
 # Background
 
