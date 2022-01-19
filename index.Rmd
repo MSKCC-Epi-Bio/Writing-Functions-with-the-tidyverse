@@ -45,8 +45,8 @@ class: inverse, center, title-slide, middle
 <p align="center"><img src="Images/White-Transparent.png" width=30%></p>
 
 .medium[
-`r icons::fontawesome("twitter") %>% icons::icon_style(fill = "#FFFFFF")` @jessicalavs @statistishdan
-`r icons::fontawesome("github")  %>% icons::icon_style(fill = "#FFFFFF")` @jalavery @ddsjoberg
+@jessicalavs `r icons::fontawesome("twitter") %>% icons::icon_style(fill = "#FFFFFF")` @statistishdan  
+@jalavery `r icons::fontawesome("github")  %>% icons::icon_style(fill = "#FFFFFF")` @ddsjoberg
 ]
 
 

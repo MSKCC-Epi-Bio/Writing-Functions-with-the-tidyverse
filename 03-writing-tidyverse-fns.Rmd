@@ -1,2 +1,117 @@
-# Background
+class: inverse, center, middle
+# Writing tidyverse-style Functions
 
+---
+# What is data-masking?
+
+.pull-left[
+* Data-masking is a distinctive feature of R whereby programming is performed directly on a data set, with columns defined as normal objects.
+]
+
+.pull-right[
+* While data-masking makes it easy to program interactively with data frames, it makes it harder to create functions.
+]
+
+```{r, eval = FALSE}
+# Unmasked programming
+mean(mtcars$cyl + mtcars$am)
+#> [1] 6.59375
+
+# Referring to columns is an error - Where is the data?
+mean(cyl + am)
+#> Error in mean(cyl + am): object 'cyl' not found
+
+# Data-masking
+with(mtcars, mean(cyl + am))
+#> [1] 6.59375
+```
+
+---
+# Why do I need `{{ · }}`?
+
+* Passing data-masked arguments to functions requires injection (also known as quasiquotation) with the embracing operator `{{ · }}` or, in more complex cases, the injection operator `!!`.
+
+* This is needed because under the hood data-masking works by defusing R code to prevent its immediate evaluation.
+
+* The defused code is resumed later on in a context where data frame columns are defined.
+
+```{r, eval = FALSE}
+my_mean <- function(data, var1, var2) {
+  dplyr::summarise(data, mean(var1 + var2))
+}
+
+my_mean(mtcars, cyl, am)
+#> Error in `dplyr::summarise()`:
+#> ! Problem while computing `..1 = mean(var1 + var2)`.
+#> Caused by error in `mean()`:
+#> ! object 'cyl' not found
+```
+
+???
+
+- The problem here is that `summarise()` defuses the R code it was supplied, i.e. mean(var1 + var2). 
+
+- Instead we want it to see mean(cyl + am). 
+
+- This is why we need injection, we need to modify that piece of code by injecting the code supplied to the function in place of var1 and var2.
+
+---
+# How to use `{{ · }}`?
+
+* To inject a function argument in data-masked context, just embrace it with `{{ · }}`
+
+```{r, eval = FALSE}
+my_mean <- function(data, var1, var2) {
+  dplyr::summarise(data, mean({{ var1 }} + {{ var2 }}))
+}
+
+my_mean(mtcars, cyl, am)
+#> # A tibble: 1 x 1
+#>   `mean(cyl + am)`
+#>              <dbl>
+#> 1             6.59
+```
+
+---
+# Alternatives to `{{ · }}`?
+
+* `{{ · }}` is a shortcut for `!!enquo(·)`
+
+* Use the `!!` and `rlang::enquo(·)` combination when you need to pass `var1` and `var2` around before it's injected.
+
+```{r, eval = FALSE}
+my_mean <- function(data, var1, var2) {
+  var1_quo <- rlang::enquo(var1)
+  var2_quo <- rlang::enquo(var2)
+  
+  dplyr::summarise(data, mean(!!var1_quo + !!var2_quo))
+}
+
+my_mean(mtcars, cyl, am)
+#> # A tibble: 1 x 1
+#>   `mean(cyl + am)`
+#>              <dbl>
+#> 1             6.59
+```
+
+---
+# Can I avoid `{{ · }}` and `!!enquo(·)`?
+
+* YES (almost)!
+
+* Immediately convert inputs into column name **strings**, and utilize all the what you learned in the first portion of this presentation.
+
+```{r, eval = FALSE}
+my_mean <- function(data, var1, var2) {
+  var1 <- dplyr::select(data, {{ var1 }}) |> names()
+  var2 <- dplyr::select(data, {{ var2 }}) |> names()
+  
+  dplyr::summarise(data, mean(.data[[var1]] + .data[[var2]]))
+}
+
+my_mean(mtcars, cyl, am)
+#> # A tibble: 1 x 1
+#>   `mean(.data[["cyl"]] + .data[["am"]])`
+#>                                    <dbl>
+#> 1                                   6.59
+```
