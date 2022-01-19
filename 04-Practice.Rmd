@@ -1,0 +1,11 @@
+class: inverse, center, middle
+# Let's Practice
+
+---
+# Let's Practice
+
+```{r, eval = FALSE}
+my_select(data, ...) {
+  # <add your code here>
+}
+```
