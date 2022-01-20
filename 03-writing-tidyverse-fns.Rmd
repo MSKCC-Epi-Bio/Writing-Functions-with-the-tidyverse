@@ -1,7 +1,13 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 class: inverse, center, middle
 # Writing tidyverse-style Functions
 
 ---
+
 # What is data-masking?
 
 .pull-left[
@@ -13,18 +19,67 @@ class: inverse, center, middle
 ]
 
 ```{r, eval = FALSE}
-# Unmasked programming
+# Almost all base R functions use unmasked programming
 mean(mtcars$cyl + mtcars$am)
 #> [1] 6.59375
 
-# Referring to columns is an error - Where is the data?
+# Referring to columns without `$` is an error - Where is the data?
 mean(cyl + am)
 #> Error in mean(cyl + am): object 'cyl' not found
 
-# Data-masking
-with(mtcars, mean(cyl + am))
-#> [1] 6.59375
+# Equivalent code with functions from dplyr that use data masking
+# Data masking allows you to reference columns without using $
+mtcars %>% 
+  summarize(new_mean = mean(cyl + am))
+#> new_mean
+#> dbl
+#> 6.59375
 ```
+
+---
+
+# Data- and Env- Variables
+
+* Data masking introduces ambiguity with respect to what you mean by "variable"
+
+* **env-variables**: objects (variables) that live in the environment; 
+usually created with `<-`
+
+```{r}
+# example of an env-variable
+x <- 3
+```
+
+* **data-variables**: variables that live in the data frame;
+usually arise from reading in data or manipulating data that was read in to 
+create new variables in a data frame
+
+```{r, eval=FALSE}
+# example of a data variable: mpg on df mtcars (and mtcars is an env-variable!)
+mtcars$mpg
+```
+
+* Relation to data masking: Data masking allows you to reference `data-variables`
+without specifying the `env-variable` they arise from. Allows for shorthand in
+code, but introduces problems when writing functions.
+
+---
+# How to tell whether a function uses data masking?
+
+In a function's help file, the arguments list will specify whether the function 
+uses data masking.
+
+*Can't get columns even??*
+
+.left-column[
+```{r, eval=FALSE}
+?filter
+```
+]
+
+.right-column[
+  <p align="center"><img src="Images/filter_help_file.png" width=50%></p>
+]
 
 ---
 # Why do I need `{{ · }}`?
@@ -115,3 +170,7 @@ my_mean(mtcars, cyl, am)
 #>                                    <dbl>
 #> 1                                   6.59
 ```
+
+
+ 
+ 

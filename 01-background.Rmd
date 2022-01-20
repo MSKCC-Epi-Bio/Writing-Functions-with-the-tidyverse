@@ -1,2 +1,64 @@
+# Outline (will clean up)
+
+Part 1: Build a function that uses tidyverse unquoted args internally (Jess)
+
+* Passing strings to dplyr verbs
+
+* `across()` and `any_of()` and `all_of()`
+
+* `.data[[varname]]` (also introduce .env pronoun)
+
+* `rlang::sym()` and `rlang::syms()`, e.g. `select(!!rlang::sym(varname))`
+
+Part 2: Build a function that uses unquoted args itself (Dan)
+
+* `{{ }}`
+
+* First, easy option is to just immediately convert unquoted variable names to strings
+`varname <- dplyr::select(data, {{ varname }}) |> names()`
+
+* `enquo()` and bang-bang (`!!`)
+
+12:40-1pm: Practice!
+
+---
+
 # Background
+
+---
+
+# Functions in R
+
+Rule of thumb: If you're copy/pasting more than twice, write a function!
+
+Functions:
+
+* Prevent inconsistencies because they force multiple computations to follow a
+single recipe
+
+* Emphasize what varies (arguments) and what is constant (everything else)
+
+* Make updates easier since you only modify one place
+
+* Make code clearer, especially if you give function and arguments informative names
+
+If you're a `{tidyverse}` user, you'll likely want to use the `{tidyverse}` for
+your functions.
+
+However, because of some technical features of the `{tidyverse}` (*data masking*),
+there are a few nuances to writing tidyverse-style functions. 
+
+---
+
+# Anatomy of a Function
+
+```{r, eval=FALSE}
+function_name <- function(argument1, argument2){
+  # code to repeat
+}
+
+# call the function
+function_name(argument1 = "arg1",
+              argument2 = "arg2")
+```
 

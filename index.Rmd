@@ -12,6 +12,8 @@ output:
       highlightLines: true
       countIncrementalSlides: false
       ratio: 16:9
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE, warning=FALSE}
@@ -20,6 +22,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 set.seed(78987)
 library(xaringanthemer)
 library(tidyverse)
+library(cowplot)
 
 style_mono_accent(
   base_color = mskRvis::msk_palette("main")[1]
@@ -44,10 +47,13 @@ class: inverse, center, title-slide, middle
 
 <p align="center"><img src="Images/White-Transparent.png" width=30%></p>
 
-.medium[
-@jessicalavs `r icons::fontawesome("twitter") %>% icons::icon_style(fill = "#FFFFFF")` @statistishdan  
-@jalavery `r icons::fontawesome("github")  %>% icons::icon_style(fill = "#FFFFFF")` @ddsjoberg
-]
+```{r}
+# had issues running this, will add back later
+# .medium[
+# @jessicalavs `r icons::fontawesome("twitter") %>% icons::icon_style(fill = "#FFFFFF")` @statistishdan
+# @jalavery `r icons::fontawesome("github")  %>% icons::icon_style(fill = "#FFFFFF")` @ddsjoberg
+# ]
+```
 
 
 ---
@@ -68,3 +74,6 @@ class: inverse, center, title-slide, middle
 ```{r child='04-Practice.Rmd'}
 ```
 
+---
+```{r child='05-resources.Rmd'}
+```
