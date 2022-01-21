@@ -42,7 +42,7 @@ class: inverse, center, title-slide, middle
 
 ### Jessica A. Lavery & Daniel D. Sjoberg
 
-#### February 8, 2021
+#### February 15, 2021
 
 
 <p align="center"><img src="Images/White-Transparent.png" width=30%></p>
