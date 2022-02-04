@@ -1,0 +1,19 @@
+# Resources
+
+* [Tidy Evaluation: Getting up to Speed](https://tidyeval.tidyverse.org/sec-up-to-speed.html)
+
+* [Programming with `dplyr` Vignette](https://dplyr.tidyverse.org/articles/programming.html)
+
+* `?dplyr_data_masking` and `?dplyr_tidy_select`
+
+* [What is data-masking and why do I need {{?](https://rlang.r-lib.org/reference/topic-data-mask.html)
+
+* [Using ggplot2 in packages](https://ggplot2.tidyverse.org/articles/ggplot2-in-packages.html)
+
+* [Functional Programming: Tidy Evaluation](https://dcl-prog.stanford.edu/tidy-eval-detailed.html)
+
+Advanced:
+
+* [rlang](https://rlang.r-lib.org/) (the underlying package that implements tidy evaluation)
+
+* [Advanced R](https://adv-r.hadley.nz/)

@@ -1,0 +1,53 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+class: inverse, center, middle
+
+# Additional Material
+
+---
+
+# Writing functions that involve base R and the `{tidyverse}`
+
+---
+
+# rlang
+
+* Examples for when you can't use the walrus operator and have to use
+`rlang::sym()` or `rlang::syms()`
+
+* `rlang::sym()` is used when you have a string and you want it to be unquoted
+
+* `rlang::syms()` is used when you have a vector and you want it to be unquoted
+
+```{r, eval=FALSE}
+# e.g., a vector of c("A", "B", "C")
+
+vec <- c("mpg", "hp")
+
+# Error: Can't subset columns that don't exist.
+# x Column `vec` doesn't exist.
+mtcars %>% 
+  dplyr::select(vec)
+
+# now works
+# similar to `all_of()` but there are times when you need the below
+mtcars %>% 
+  dplyr::select(!!!rlang::syms(vec))
+```
+
+* Can also be used to name variables within functions
+
+* Can use `rlang::expr()` to see what `rlang::sym()` is evaluating to
+
+```{r, eval=FALSE}
+vec <- c("mpg", "hp")
+
+rlang::expr(mtcars %>% 
+  dplyr::select(!!!rlang::syms(vec)))
+# mtcars %>% dplyr::select(mpg, hp)
+```
+

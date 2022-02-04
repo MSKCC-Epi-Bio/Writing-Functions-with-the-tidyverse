@@ -1,7 +1,7 @@
 ---
 title: "Writing Functions with the {tidyverse}"
 author: "Jessica A. Lavery & Daniel D. Sjoberg"
-date: "April 27, 2021"
+date: "February 15, 2022"
 output:
   xaringan::moon_reader:
     css: [xaringan-themer.css, custom.css]
@@ -42,38 +42,41 @@ class: inverse, center, title-slide, middle
 
 ### Jessica A. Lavery & Daniel D. Sjoberg
 
-#### February 15, 2021
+#### February 15, 2022
 
 
 <p align="center"><img src="Images/White-Transparent.png" width=30%></p>
 
-```{r}
-# had issues running this, will add back later
-# .medium[
-# @jessicalavs `r icons::fontawesome("twitter") %>% icons::icon_style(fill = "#FFFFFF")` @statistishdan
-# @jalavery `r icons::fontawesome("github")  %>% icons::icon_style(fill = "#FFFFFF")` @ddsjoberg
-# ]
-```
+.medium[
+@jessicalavs `r icons::fontawesome("twitter") %>% icons::icon_style(fill = "#FFFFFF")` @statistishdan
 
+@jalavery `r icons::fontawesome("github")  %>% icons::icon_style(fill = "#FFFFFF")` @ddsjoberg
+]
 
 ---
 ```{r child='01-background.Rmd'}
 ```
 
-
 ---
 ```{r child='02-using-tidyverse-fns.Rmd'}
 ```
-
 
 ---
 ```{r child='03-writing-tidyverse-fns.Rmd'}
 ```
 
 ---
-```{r child='04-Practice.Rmd'}
+```{r child='04-writing-unquoted-tidyverse-fns.Rmd'}
 ```
 
 ---
-```{r child='05-resources.Rmd'}
+```{r child='05-Practice.Rmd'}
+```
+
+---
+```{r child='06-resources.Rmd'}
+```
+
+---
+```{r child='07-additional-material.Rmd'}
 ```

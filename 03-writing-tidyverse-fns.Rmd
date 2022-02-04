@@ -8,169 +8,157 @@ class: inverse, center, middle
 
 ---
 
-# What is data-masking?
+# Two Options for Writing tidyverse-style Functions
 
-.pull-left[
-* Data-masking is a distinctive feature of R whereby programming is performed directly on a data set, with columns defined as normal objects.
-]
-
-.pull-right[
-* While data-masking makes it easy to program interactively with data frames, it makes it harder to create functions.
-]
+* Option 1: Write a function that uses **quoted** arguments in the function call
 
 ```{r, eval = FALSE}
-# Almost all base R functions use unmasked programming
-mean(mtcars$cyl + mtcars$am)
-#> [1] 6.59375
+# calling tbl_summary using quoted arguments
+tbl_summary(trial, include = c("trt", "age"))
+```
 
-# Referring to columns without `$` is an error - Where is the data?
-mean(cyl + am)
-#> Error in mean(cyl + am): object 'cyl' not found
+* Option 2: Write a function that uses **unquoted** arguments in the function call 
+(also known as *bare arguments*)
 
-# Equivalent code with functions from dplyr that use data masking
-# Data masking allows you to reference columns without using $
-mtcars %>% 
-  summarize(new_mean = mean(cyl + am))
-#> new_mean
-#> dbl
-#> 6.59375
+```{r, eval = FALSE}
+# calling tbl_summary using unquoted arguments (not all functions accept quoted + unquoted input)
+tbl_summary(trial, include = c(trt, age))
+```
+
+* Requiring quoted or unquoted function arguments is a matter of developer 
+preference
+
+* May be slightly easier for the user to supply unquoted arguments (less typing)
+
+* The type of argument required by the function (quoted or unquoted)
+should be specified in the help file when writing functions more formally
+
+---
+
+class: inverse, center, middle
+# Option 1: Functions that use quoted arguments in a function call
+
+---
+
+# Passing Strings to `dplyr` verbs
+
+`dplyr` verbs: 
+
+* `select()`: picks variables based on their names
+
+* `filter()`: picks cases based on their values
+
+* `arrange()`: changes the ordering of the rows
+
+* `mutate()`: adds new variables based on existing variables
+
+*From [dplyr website](https://dplyr.tidyverse.org/)
+
+---
+
+# Passing Strings to `dplyr` verbs
+
+* This means that you want to use any of the `dplyr` verbs in your function, and want to pass a string.
+
+For example:
+
+```{r, eval = FALSE}
+# using a function to select a single variable
+my_function <- function(select_variable){
+  mtcars %>% 
+    dplyr::select(select_variable)
+}
+
+my_function(select_variable = "mpg")
+my_function(select_variable = "wt")
+
+# Note: Using an external vector in selections is ambiguous.
+# i Use `all_of(select_variable)` instead of `select_variable` to silence this message.
+# i See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
+```
+
+Why did we get this note?
+
+---
+
+# Functions for Passing Strings to `dplyr` verbs
+
+* `any_of()` and `all_of()` are helper functions to select variables from 
+a character vector
+
+* `any_of()`: selecting any of the listed variables
+
+* `all_of()`: for strict selection. If any of the variables in the character vector is missing, an error is thrown
+
+* Can also use `!all_of()` to select all variables not found in the character vector supplied to `all_of()`
+
+```{r, eval = FALSE}
+# using a function to select a single variable
+my_function_improved <- function(select_variable){
+  mtcars %>% 
+    dplyr::select(dplyr::all_of(select_variable))
+}
+
+my_function_improved(select_variable = "mpg")
+# no note!
 ```
 
 ---
 
-# Data- and Env- Variables
+# Functions for Passing Strings to `dplyr` verbs
 
-* Data masking introduces ambiguity with respect to what you mean by "variable"
+* `across()`: if you want the user to provide a set of data-variables that are then transformed
+•
+* See `vignette("colwise")`
 
-* **env-variables**: objects (variables) that live in the environment; 
-usually created with `<-`
+```{r, eval = FALSE}
+summarise_mean <- function(data, vars) {
+  data %>% 
+    summarise(n = n(), across({{ vars }}, mean))
+}
+
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarise_mean(where(is.numeric))
+```
 
 ```{r}
-# example of an env-variable
-x <- 3
+my_summarise <- function(data, group_var, summarise_var) {
+  data %>%
+    group_by(across({{ group_var }})) %>% 
+    summarise(across({{ summarise_var }}, mean))
+}
 ```
 
-* **data-variables**: variables that live in the data frame;
-usually arise from reading in data or manipulating data that was read in to 
-create new variables in a data frame
+* Use the `.names` argument to `across()` to control the names of the output.
 
 ```{r, eval=FALSE}
-# example of a data variable: mpg on df mtcars (and mtcars is an env-variable!)
-mtcars$mpg
-```
-
-* Relation to data masking: Data masking allows you to reference `data-variables`
-without specifying the `env-variable` they arise from. Allows for shorthand in
-code, but introduces problems when writing functions.
-
----
-# How to tell whether a function uses data masking?
-
-In a function's help file, the arguments list will specify whether the function 
-uses data masking.
-
-*Can't get columns even??*
-
-.left-column[
-```{r, eval=FALSE}
-?filter
-```
-]
-
-.right-column[
-  <p align="center"><img src="Images/filter_help_file.png" width=50%></p>
-]
-
----
-# Why do I need `{{ · }}`?
-
-* Passing data-masked arguments to functions requires injection (also known as quasiquotation) with the embracing operator `{{ · }}` or, in more complex cases, the injection operator `!!`.
-
-* This is needed because under the hood data-masking works by defusing R code to prevent its immediate evaluation.
-
-* The defused code is resumed later on in a context where data frame columns are defined.
-
-```{r, eval = FALSE}
-my_mean <- function(data, var1, var2) {
-  dplyr::summarise(data, mean(var1 + var2))
+my_summarise <- function(data, group_var, summarise_var) {
+  data %>%
+    group_by(across({{ group_var }})) %>% 
+    summarise(across({{ summarise_var }}, mean, .names = "mean_{.col}"))
 }
-
-my_mean(mtcars, cyl, am)
-#> Error in `dplyr::summarise()`:
-#> ! Problem while computing `..1 = mean(var1 + var2)`.
-#> Caused by error in `mean()`:
-#> ! object 'cyl' not found
 ```
 
-???
-
-- The problem here is that `summarise()` defuses the R code it was supplied, i.e. mean(var1 + var2). 
-
-- Instead we want it to see mean(cyl + am). 
-
-- This is why we need injection, we need to modify that piece of code by injecting the code supplied to the function in place of var1 and var2.
 
 ---
-# How to use `{{ · }}`?
 
-* To inject a function argument in data-masked context, just embrace it with `{{ · }}`
+# `.data[[ · ]]`
 
-```{r, eval = FALSE}
-my_mean <- function(data, var1, var2) {
-  dplyr::summarise(data, mean({{ var1 }} + {{ var2 }}))
-}
+* `.data` $\ne$ data frame
 
-my_mean(mtcars, cyl, am)
-#> # A tibble: 1 x 1
-#>   `mean(cyl + am)`
-#>              <dbl>
-#> 1             6.59
-```
+* In `{tidyverse}` speak, `.data` is a *pronoun*
+
+* Used as `.data$x` or `.data[[var]]`
 
 ---
-# Alternatives to `{{ · }}`?
 
-* `{{ · }}` is a shortcut for `!!enquo(·)`
+# Naming variables within your function
 
-* Use the `!!` and `rlang::enquo(·)` combination when you need to pass `var1` and `var2` around before it's injected.
-
-```{r, eval = FALSE}
-my_mean <- function(data, var1, var2) {
-  var1_quo <- rlang::enquo(var1)
-  var2_quo <- rlang::enquo(var2)
-  
-  dplyr::summarise(data, mean(!!var1_quo + !!var2_quo))
-}
-
-my_mean(mtcars, cyl, am)
-#> # A tibble: 1 x 1
-#>   `mean(cyl + am)`
-#>              <dbl>
-#> 1             6.59
-```
+* Cue, the walrus operator `:=`
 
 ---
-# Can I avoid `{{ · }}` and `!!enquo(·)`?
 
-* YES! (mostly)
+class: inverse, center, middle
 
-* Immediately convert inputs into column name **strings**, and utilize all the what you learned in the first portion of this presentation.
-
-```{r, eval = FALSE}
-my_mean <- function(data, var1, var2) {
-  var1 <- dplyr::select(data, {{ var1 }}) |> names()
-  var2 <- dplyr::select(data, {{ var2 }}) |> names()
-  
-  dplyr::summarise(data, mean(.data[[var1]] + .data[[var2]]))
-}
-
-my_mean(mtcars, cyl, am)
-#> # A tibble: 1 x 1
-#>   `mean(.data[["cyl"]] + .data[["am"]])`
-#>                                    <dbl>
-#> 1                                   6.59
-```
-
-
- 
- 
+# Questions?

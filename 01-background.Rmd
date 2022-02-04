@@ -1,35 +1,68 @@
-# Outline (will clean up)
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+class: inverse
 
-Part 1: Build a function that uses tidyverse unquoted args internally (Jess)
+# Poll
 
-* Passing strings to dplyr verbs
+Have you ever heard of tidy evaluation?
 
-* `across()` and `any_of()` and `all_of()`
+* No
 
-* `.data[[varname]]` (also introduce .env pronoun)
+* I've heard of it, but I'm not sure what it is
 
-* `rlang::sym()` and `rlang::syms()`, e.g. `select(!!rlang::sym(varname))`
+* I know what it is, but I'm not comfortable using it
 
-Part 2: Build a function that uses unquoted args itself (Dan)
-
-* `{{ }}`
-
-* First, easy option is to just immediately convert unquoted variable names to strings
-`varname <- dplyr::select(data, {{ varname }}) |> names()`
-
-* `enquo()` and bang-bang (`!!`)
-
-12:40-1pm: Practice!
+* Yes, I feel comfortable using it
 
 ---
 
-# Background
+# Goals for Today
+
+Be able to write a function that utilizes `{tidyverse}` functions (e.g., 
+`mutate`, `select`, `filter`, etc.) by using tidy evaluation
+
+---
+
+# Outline 
+
+* Function Basics
+
+* Functions that use **quoted** arguments in a function call
+
+    - Passing strings to `dplyr` verbs
+
+    - `across()` and `any_of()` and `all_of()`
+
+    - `.data[[varname]]` (also introduce .env pronoun)
+
+    - Naming variables using the walrus operator (`:=`)
+
+* Functions that use **unquoted** arguments in a function call
+
+    -  curly-curly (`{{ }}`)
+
+    - `enquo()` and bang-bang (`!!`)
+    
+---
+
+# Outline
+  
+* 12:40-1pm: Practice!
+
+* Additional Material (if time)
+
+  - Writing functions that use both `{tidyverse}` functions & base R functions
+
+  - `rlang::sym()` and `rlang::syms()`, e.g. `select(!!rlang::sym(varname))`
 
 ---
 
 # Functions in R
 
-Rule of thumb: If you're copy/pasting more than twice, write a function!
+**Rule of thumb**: If you're copy/pasting more than twice, write a function!
 
 Functions:
 
@@ -54,11 +87,155 @@ there are a few nuances to writing tidyverse-style functions.
 
 ```{r, eval=FALSE}
 function_name <- function(argument1, argument2){
+  # body of the function
   # code to repeat
 }
 
-# call the function
+# the function call
 function_name(argument1 = "arg1",
               argument2 = "arg2")
 ```
+
+---
+
+# What's Returned by a Function
+
+* By default, only the last known operation is returned by the function
+
+* This is *different* from SAS macros
+
+* Can use a named list to return multiple objects
+
+```{r, eval=FALSE}
+example_return_list <- function(arg1){
+  # function body
+  
+  # create object 1
+  
+  # create object 2
+  
+  return(list("object1" = object1,
+              "object2" = object2))
+}
+
+# store the function call 
+call_return_list <- example_return_list(arg1)
+
+# will return
+call_return_list$object1
+call_return_list$object2
+```
+
+---
+
+# Steps for Writing a Function
+
+1. Write and test your code in R, outside of a function
+
+2. Enclose in `function(){[working code here]}` with an informatively named 
+function and arguments
+
+3. Adapt code to replace variable names and/or values with function arguments,
+as needed
+
+---
+
+# Attempt #1: Writing a tiyverse-style function
+
+```{r, eval=FALSE}
+# outside of a function, this code works
+gtsummary::trial %>% 
+  select(trt)
+# A tibble: 200 x 1
+#   trt   
+#   <chr> 
+# 1 Drug A
+# 2 Drug B
+# 3 Drug A
+# 4 Drug A
+# etc.
+```
+
+```{r, eval = FALSE}
+# putting the exact (working) code into a function
+test_function <- function(select_var){
+  gtsummary::trial %>% 
+    select(select_var)
+}
+
+# Error: object 'trt' not found
+test_function(select_var = trt)
+```
+
+* Why does this error occur? Because the `{tidyverse}` utilizes *data masking*
+
+---
+
+# What is data-masking?
+
+.pull-left[
+* Data-masking is a distinctive feature of R whereby programming is performed directly on a data set, with columns defined as normal objects.
+]
+
+.pull-right[
+* While data-masking makes it easy to program interactively with data frames, it makes it harder to create functions.
+]
+
+```{r, eval = FALSE}
+# Almost all base R functions use unmasked programming
+mean(mtcars$cyl + mtcars$am)
+#> [1] 6.59375
+
+# Referring to columns without `$` is an error - Where is the data?
+mean(cyl + am)
+#> Error in mean(cyl + am): object 'cyl' not found
+# R is looking in the global environment for an object named 'cyl'
+
+# Equivalent code with functions from dplyr that use data masking
+# Data masking allows you to reference columns without using $
+mtcars %>% 
+  summarize(new_mean = mean(cyl + am))
+#> new_mean
+#> dbl
+#> 6.59375
+```
+
+---
+# How to tell whether a function uses data masking?
+
+In a function's help file, the arguments list will specify whether the function 
+uses data masking.
+
+<p align="center"><img src="Images/filter_help_file.png" width=50%></p>
+
+---
+
+# Data- and Env- Variables
+
+* Data masking introduces ambiguity with respect to what you mean by "variable"
+
+* This ambiguity is clarified by indicating to R where to look for an object
+(within a data frame or within the environment)
+
+* **env-variables**: objects (variables) that live in the environment; 
+usually created with `<-`
+
+```{r}
+# example of an env-variable
+x <- 3
+```
+
+* **data-variables**: variables that live in the data frame;
+usually arise from reading in data or manipulating data that was read in to 
+create new variables in a data frame
+
+```{r, eval=FALSE}
+# example of a data variable: mpg on df mtcars (and mtcars is an env-variable!)
+mtcars$mpg
+```
+
+* Relation to data masking: Data masking allows you to reference `data-variables`
+without specifying the `env-variable` they arise from. Allows for shorthand in
+code, but introduces problems when writing functions.
+
 

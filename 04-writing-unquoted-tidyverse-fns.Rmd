@@ -1,0 +1,132 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+class: inverse, center, middle
+# Option 2: Functions that use unquoted arguments in the function call
+
+---
+# Why do I need `{{ · }}`?
+
+* Passing data-masked arguments to functions requires injection (also known as quasiquotation) with the embracing operator `{{ · }}` or, in more complex cases, the injection operator `!!`.
+
+* This is needed because under the hood data-masking works by defusing R code to prevent its immediate evaluation.
+
+* The defused code is resumed later on in a context where data frame columns are defined.
+
+```{r, eval = FALSE}
+my_mean <- function(data, var1, var2) {
+  dplyr::summarise(data, mean(var1 + var2))
+}
+
+my_mean(mtcars, cyl, am)
+#> Error in `dplyr::summarise()`:
+#> ! Problem while computing `..1 = mean(var1 + var2)`.
+#> Caused by error in `mean()`:
+#> ! object 'cyl' not found
+```
+
+???
+
+- The problem here is that `summarise()` defuses the R code it was supplied, i.e. mean(var1 + var2). 
+
+- Instead we want it to see mean(cyl + am). 
+
+- This is why we need injection, we need to modify that piece of code by injecting the code supplied to the function in place of var1 and var2.
+
+---
+
+ First, easy option is to just immediately convert unquoted variable names to strings
+`varname <- dplyr::select(data, {{ varname }}) |> names()`
+
+---
+# How to use `{{ · }}`?
+
+* To inject a function argument in data-masked context, just embrace it with `{{ · }}`
+
+```{r, eval = FALSE}
+my_mean <- function(data, var1, var2) {
+  dplyr::summarise(data, mean({{ var1 }} + {{ var2 }}))
+}
+
+my_mean(mtcars, cyl, am)
+#> # A tibble: 1 x 1
+#>   `mean(cyl + am)`
+#>              <dbl>
+#> 1             6.59
+```
+
+---
+# Alternatives to `{{ · }}`?
+
+* `{{ · }}` is a shortcut for `!!enquo(·)`
+
+* Use the `!!` and `rlang::enquo(·)` combination when you need to pass `var1` and `var2` around before it's injected.
+
+```{r, eval = FALSE}
+my_mean <- function(data, var1, var2) {
+  var1_quo <- rlang::enquo(var1)
+  var2_quo <- rlang::enquo(var2)
+  
+  dplyr::summarise(data, mean(!!var1_quo + !!var2_quo))
+}
+
+my_mean(mtcars, cyl, am)
+#> # A tibble: 1 x 1
+#>   `mean(cyl + am)`
+#>              <dbl>
+#> 1             6.59
+```
+
+---
+# Can I avoid `{{ · }}` and `!!enquo(·)`?
+
+* YES! (mostly)
+
+* Immediately convert inputs into column name **strings**, and utilize all the what you learned in the first portion of this presentation.
+
+```{r, eval = FALSE}
+my_mean <- function(data, var1, var2) {
+  var1 <- dplyr::select(data, {{ var1 }}) |> names()
+  var2 <- dplyr::select(data, {{ var2 }}) |> names()
+  
+  dplyr::summarise(data, mean(.data[[var1]] + .data[[var2]]))
+}
+
+my_mean(mtcars, cyl, am)
+#> # A tibble: 1 x 1
+#>   `mean(.data[["cyl"]] + .data[["am"]])`
+#>                                    <dbl>
+#> 1                                   6.59
+```
+
+## Using the names of arguments in the output
+
+* Use `{glue}` syntax in conjunction with `:=` (the walrus operator)
+
+```{r, eval = FALSE}
+my_summarise4 <- function(data, expr) {
+  data %>% summarise(
+    "mean_{{expr}}" := mean({{ expr }}),
+    "sum_{{expr}}" := sum({{ expr }}),
+    "n_{{expr}}" := n()
+  )
+}
+```
+
+---
+
+# Conclusion
+
+1. Don't copy/paste your code >2x, write a function! 
+  
+2. When writing functions using the `{tidyverse}`, need to account for the back-end
+design of the `{tidyverse}`, namely data masking
+
+---
+
+class: inverse, center, middle
+
+# Questions?

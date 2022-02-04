@@ -4,7 +4,7 @@
     <title>Writing Functions with the {tidyverse}</title>
     <meta charset="utf-8" />
     <meta name="author" content="Jessica A. Lavery &amp; Daniel D. Sjoberg" />
-    <meta name="date" content="2021-04-27" />
+    <meta name="date" content="2022-02-15" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <script src="libs/freezeframe/freezeframe.min.js"></script>
     <script src="libs/xaringanExtra-freezeframe/freezeframe-init.js"></script>
@@ -26,55 +26,84 @@ class: inverse, center, title-slide, middle
 
 ### Jessica A. Lavery &amp; Daniel D. Sjoberg
 
-#### February 8, 2021
+#### February 15, 2022
 
 
 &lt;p align="center"&gt;&lt;img src="Images/White-Transparent.png" width=30%&gt;&lt;/p&gt;
 
+.medium[
+@jessicalavs &lt;svg viewBox="0 0 512 512" style="height:1em;position:relative;display:inline-block;top:.1em;fill:#FFFFFF;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"&gt;&lt;/path&gt;&lt;/svg&gt; @statistishdan
 
-```r
-# had issues running this, will add back later
-# .medium[
-# @jessicalavs `r icons::fontawesome("twitter") %&gt;% icons::icon_style(fill = "#FFFFFF")` @statistishdan
-# @jalavery `r icons::fontawesome("github")  %&gt;% icons::icon_style(fill = "#FFFFFF")` @ddsjoberg
-# ]
-```
-
+@jalavery &lt;svg viewBox="0 0 496 512" style="height:1em;position:relative;display:inline-block;top:.1em;fill:#FFFFFF;" xmlns="http://www.w3.org/2000/svg"&gt;  &lt;path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"&gt;&lt;/path&gt;&lt;/svg&gt; @ddsjoberg
+]
 
 ---
 
-# Outline (will clean up)
 
-Part 1: Build a function that uses tidyverse unquoted args internally (Jess)
 
-* Passing strings to dplyr verbs
 
-* `across()` and `any_of()` and `all_of()`
 
-* `.data[[varname]]` (also introduce .env pronoun)
 
-* `rlang::sym()` and `rlang::syms()`, e.g. `select(!!rlang::sym(varname))`
+class: inverse
 
-Part 2: Build a function that uses unquoted args itself (Dan)
+# Poll
 
-* `{{ }}`
+Have you ever heard of tidy evaluation?
 
-* First, easy option is to just immediately convert unquoted variable names to strings
-`varname &lt;- dplyr::select(data, {{ varname }}) |&gt; names()`
+* No
 
-* `enquo()` and bang-bang (`!!`)
+* I've heard of it, but I'm not sure what it is
 
-12:40-1pm: Practice!
+* I know what it is, but I'm not comfortable using it
+
+* Yes, I feel comfortable using it
 
 ---
 
-# Background
+# Goals for Today
+
+Be able to write a function that utilizes `{tidyverse}` functions (e.g., 
+`mutate`, `select`, `filter`, etc.) by using tidy evaluation
+
+---
+
+# Outline 
+
+* Function Basics
+
+* Functions that use **quoted** arguments in a function call
+
+    - Passing strings to `dplyr` verbs
+
+    - `across()` and `any_of()` and `all_of()`
+
+    - `.data[[varname]]` (also introduce .env pronoun)
+
+    - Naming variables using the walrus operator (`:=`)
+
+* Functions that use **unquoted** arguments in a function call
+
+    -  curly-curly (`{{ }}`)
+
+    - `enquo()` and bang-bang (`!!`)
+    
+---
+
+# Outline
+  
+* 12:40-1pm: Practice!
+
+* Additional Material (if time)
+
+  - Writing functions that use both `{tidyverse}` functions &amp; base R functions
+
+  - `rlang::sym()` and `rlang::syms()`, e.g. `select(!!rlang::sym(varname))`
 
 ---
 
 # Functions in R
 
-Rule of thumb: If you're copy/pasting more than twice, write a function!
+**Rule of thumb**: If you're copy/pasting more than twice, write a function!
 
 Functions:
 
@@ -100,35 +129,90 @@ there are a few nuances to writing tidyverse-style functions.
 
 ```r
 function_name &lt;- function(argument1, argument2){
+  # body of the function
   # code to repeat
 }
 
-# call the function
+# the function call
 function_name(argument1 = "arg1",
               argument2 = "arg2")
 ```
 
+---
 
+# What's Returned by a Function
+
+* By default, only the last known operation is returned by the function
+
+* This is *different* from SAS macros
+
+* Can use a named list to return multiple objects
+
+
+```r
+example_return_list &lt;- function(arg1){
+  # function body
+  
+  # create object 1
+  
+  # create object 2
+  
+  return(list("object1" = object1,
+              "object2" = object2))
+}
+
+# store the function call 
+call_return_list &lt;- example_return_list(arg1)
+
+# will return
+call_return_list$object1
+call_return_list$object2
+```
 
 ---
 
-class: inverse, center, middle
-# Using tidyverse-style Functions
+# Steps for Writing a Function
+
+1. Write and test your code in R, outside of a function
+
+2. Enclose in `function(){[working code here]}` with an informatively named 
+function and arguments
+
+3. Adapt code to replace variable names and/or values with function arguments,
+as needed
 
 ---
-# Background
+
+# Attempt #1: Writing a tiyverse-style function
 
 
+```r
+# outside of a function, this code works
+gtsummary::trial %&gt;% 
+  select(trt)
+# A tibble: 200 x 1
+#   trt   
+#   &lt;chr&gt; 
+# 1 Drug A
+# 2 Drug B
+# 3 Drug A
+# 4 Drug A
+# etc.
+```
 
----
 
+```r
+# putting the exact (working) code into a function
+test_function &lt;- function(select_var){
+  gtsummary::trial %&gt;% 
+    select(select_var)
+}
 
+# Error: object 'trt' not found
+test_function(select_var = trt)
+```
 
-
-
-
-class: inverse, center, middle
-# Writing tidyverse-style Functions
+* Why does this error occur? Because the `{tidyverse}` utilizes *data masking*
 
 ---
 
@@ -151,6 +235,7 @@ mean(mtcars$cyl + mtcars$am)
 # Referring to columns without `$` is an error - Where is the data?
 mean(cyl + am)
 #&gt; Error in mean(cyl + am): object 'cyl' not found
+# R is looking in the global environment for an object named 'cyl'
 
 # Equivalent code with functions from dplyr that use data masking
 # Data masking allows you to reference columns without using $
@@ -162,10 +247,21 @@ mtcars %&gt;%
 ```
 
 ---
+# How to tell whether a function uses data masking?
+
+In a function's help file, the arguments list will specify whether the function 
+uses data masking.
+
+&lt;p align="center"&gt;&lt;img src="Images/filter_help_file.png" width=50%&gt;&lt;/p&gt;
+
+---
 
 # Data- and Env- Variables
 
 * Data masking introduces ambiguity with respect to what you mean by "variable"
+
+* This ambiguity is clarified by indicating to R where to look for an object
+(within a data frame or within the environment)
 
 * **env-variables**: objects (variables) that live in the environment; 
 usually created with `&lt;-`
@@ -190,24 +286,201 @@ mtcars$mpg
 without specifying the `env-variable` they arise from. Allows for shorthand in
 code, but introduces problems when writing functions.
 
+
+
 ---
-# How to tell whether a function uses data masking?
 
-In a function's help file, the arguments list will specify whether the function 
-uses data masking.
+class: inverse, center, middle
+# Using tidyverse-style Functions
 
-*Can't get columns even??*
+---
 
-.left-column[
+*What did we want to put here?*
+
+---
+
+
+
+
+
+
+class: inverse, center, middle
+# Writing tidyverse-style Functions
+
+---
+
+# Two Options for Writing tidyverse-style Functions
+
+* Option 1: Write a function that uses **quoted** arguments in the function call
+
 
 ```r
-?filter
+# calling tbl_summary using quoted arguments
+tbl_summary(trial, include = c("trt", "age"))
 ```
-]
 
-.right-column[
-  &lt;p align="center"&gt;&lt;img src="Images/filter_help_file.png" width=50%&gt;&lt;/p&gt;
-]
+* Option 2: Write a function that uses **unquoted** arguments in the function call 
+(also known as *bare arguments*)
+
+
+```r
+# calling tbl_summary using unquoted arguments (not all functions accept quoted + unquoted input)
+tbl_summary(trial, include = c(trt, age))
+```
+
+* Requiring quoted or unquoted function arguments is a matter of developer 
+preference
+
+* May be slightly easier for the user to supply unquoted arguments (less typing)
+
+* The type of argument required by the function (quoted or unquoted)
+should be specified in the help file when writing functions more formally
+
+---
+
+class: inverse, center, middle
+# Option 1: Functions that use quoted arguments in a function call
+
+---
+
+# Passing Strings to `dplyr` verbs
+
+`dplyr` verbs: 
+
+* `select()`: picks variables based on their names
+
+* `filter()`: picks cases based on their values
+
+* `arrange()`: changes the ordering of the rows
+
+* `mutate()`: adds new variables based on existing variables
+
+*From [dplyr website](https://dplyr.tidyverse.org/)
+
+---
+
+# Passing Strings to `dplyr` verbs
+
+* This means that you want to use any of the `dplyr` verbs in your function, and want to pass a string.
+
+For example:
+
+
+```r
+# using a function to select a single variable
+my_function &lt;- function(select_variable){
+  mtcars %&gt;% 
+    dplyr::select(select_variable)
+}
+
+my_function(select_variable = "mpg")
+my_function(select_variable = "wt")
+
+# Note: Using an external vector in selections is ambiguous.
+# i Use `all_of(select_variable)` instead of `select_variable` to silence this message.
+# i See &lt;https://tidyselect.r-lib.org/reference/faq-external-vector.html&gt;.
+```
+
+Why did we get this note?
+
+---
+
+# Functions for Passing Strings to `dplyr` verbs
+
+* `any_of()` and `all_of()` are helper functions to select variables from 
+a character vector
+
+* `any_of()`: selecting any of the listed variables
+
+* `all_of()`: for strict selection. If any of the variables in the character vector is missing, an error is thrown
+
+* Can also use `!all_of()` to select all variables not found in the character vector supplied to `all_of()`
+
+
+```r
+# using a function to select a single variable
+my_function_improved &lt;- function(select_variable){
+  mtcars %&gt;% 
+    dplyr::select(dplyr::all_of(select_variable))
+}
+
+my_function_improved(select_variable = "mpg")
+# no note!
+```
+
+---
+
+# Functions for Passing Strings to `dplyr` verbs
+
+* `across()`: if you want the user to provide a set of data-variables that are then transformed
+•
+* See `vignette("colwise")`
+
+
+```r
+summarise_mean &lt;- function(data, vars) {
+  data %&gt;% 
+    summarise(n = n(), across({{ vars }}, mean))
+}
+
+mtcars %&gt;% 
+  group_by(cyl) %&gt;% 
+  summarise_mean(where(is.numeric))
+```
+
+
+```r
+my_summarise &lt;- function(data, group_var, summarise_var) {
+  data %&gt;%
+    group_by(across({{ group_var }})) %&gt;% 
+    summarise(across({{ summarise_var }}, mean))
+}
+```
+
+* Use the `.names` argument to `across()` to control the names of the output.
+
+
+```r
+my_summarise &lt;- function(data, group_var, summarise_var) {
+  data %&gt;%
+    group_by(across({{ group_var }})) %&gt;% 
+    summarise(across({{ summarise_var }}, mean, .names = "mean_{.col}"))
+}
+```
+
+
+---
+
+# `.data[[ · ]]`
+
+* `.data` `\(\ne\)` data frame
+
+* In `{tidyverse}` speak, `.data` is a *pronoun*
+
+* Used as `.data$x` or `.data[[var]]`
+
+---
+
+# Naming variables within your function
+
+* Cue, the walrus operator `:=`
+
+---
+
+class: inverse, center, middle
+
+# Questions?
+
+---
+
+
+
+
+
+
+
+class: inverse, center, middle
+# Option 2: Functions that use unquoted arguments in the function call
 
 ---
 # Why do I need `{{ · }}`?
@@ -238,6 +511,11 @@ my_mean(mtcars, cyl, am)
 - Instead we want it to see mean(cyl + am). 
 
 - This is why we need injection, we need to modify that piece of code by injecting the code supplied to the function in place of var1 and var2.
+
+---
+
+ First, easy option is to just immediately convert unquoted variable names to strings
+`varname &lt;- dplyr::select(data, {{ varname }}) |&gt; names()`
 
 ---
 # How to use `{{ · }}`?
@@ -303,9 +581,35 @@ my_mean(mtcars, cyl, am)
 #&gt; 1                                   6.59
 ```
 
+## Using the names of arguments in the output
 
- 
- 
+* Use `{glue}` syntax in conjunction with `:=` (the walrus operator)
+
+
+```r
+my_summarise4 &lt;- function(data, expr) {
+  data %&gt;% summarise(
+    "mean_{{expr}}" := mean({{ expr }}),
+    "sum_{{expr}}" := sum({{ expr }}),
+    "n_{{expr}}" := n()
+  )
+}
+```
+
+---
+
+# Conclusion
+
+1. Don't copy/paste your code &gt;2x, write a function! 
+  
+2. When writing functions using the `{tidyverse}`, need to account for the back-end
+design of the `{tidyverse}`, namely data masking
+
+---
+
+class: inverse, center, middle
+
+# Questions?
 
 ---
 
@@ -346,22 +650,83 @@ my_mean(data, variable) {
 
 ---
 
-# Conclusion
-
-1. Don't copy/paste your code &gt;2x, write a function! 
-  
-2. When writing functions using the `{tidyverse}`, need to account for the back-end
-design of the `{tidyverse}`, namely data masking
-
----
-
 # Resources
 
 * [Tidy Evaluation: Getting up to Speed](https://tidyeval.tidyverse.org/sec-up-to-speed.html)
 
 * [Programming with `dplyr` Vignette](https://dplyr.tidyverse.org/articles/programming.html)
 
-* `?dplyr_data_masking`
+* `?dplyr_data_masking` and `?dplyr_tidy_select`
+
+* [What is data-masking and why do I need {{?](https://rlang.r-lib.org/reference/topic-data-mask.html)
+
+* [Using ggplot2 in packages](https://ggplot2.tidyverse.org/articles/ggplot2-in-packages.html)
+
+* [Functional Programming: Tidy Evaluation](https://dcl-prog.stanford.edu/tidy-eval-detailed.html)
+
+Advanced:
+
+* [rlang](https://rlang.r-lib.org/) (the underlying package that implements tidy evaluation)
+
+* [Advanced R](https://adv-r.hadley.nz/)
+
+---
+
+
+
+
+
+
+
+class: inverse, center, middle
+
+# Additional Material
+
+---
+
+# Writing functions that involve base R and the `{tidyverse}`
+
+---
+
+# rlang
+
+* Examples for when you can't use the walrus operator and have to use
+`rlang::sym()` or `rlang::syms()`
+
+* `rlang::sym()` is used when you have a string and you want it to be unquoted
+
+* `rlang::syms()` is used when you have a vector and you want it to be unquoted
+
+
+```r
+# e.g., a vector of c("A", "B", "C")
+
+vec &lt;- c("mpg", "hp")
+
+# Error: Can't subset columns that don't exist.
+# x Column `vec` doesn't exist.
+mtcars %&gt;% 
+  dplyr::select(vec)
+
+# now works
+# similar to `all_of()` but there are times when you need the below
+mtcars %&gt;% 
+  dplyr::select(!!!rlang::syms(vec))
+```
+
+* Can also be used to name variables within functions
+
+* Can use `rlang::expr()` to see what `rlang::sym()` is evaluating to
+
+
+```r
+vec &lt;- c("mpg", "hp")
+
+rlang::expr(mtcars %&gt;% 
+  dplyr::select(!!!rlang::syms(vec)))
+# mtcars %&gt;% dplyr::select(mpg, hp)
+```
+
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
