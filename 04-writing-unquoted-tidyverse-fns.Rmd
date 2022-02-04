@@ -5,7 +5,7 @@ editor_options:
 ---
 
 class: inverse, center, middle
-# Option 2: Functions that use unquoted arguments in the function call
+# Option 2: Writing functions that use unquoted arguments in the function call
 
 ---
 # Why do I need `{{ · }}`?

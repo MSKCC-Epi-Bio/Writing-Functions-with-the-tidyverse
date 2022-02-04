@@ -71,17 +71,17 @@ Be able to write a function that utilizes `{tidyverse}` functions (e.g.,
 
 * Function Basics
 
-* Functions that use **quoted** arguments in a function call
+* Writing functions that use **quoted** arguments in a function call
 
     - Passing strings to `dplyr` verbs
+  
+    - `.data[[varname]]`
 
     - `across()` and `any_of()` and `all_of()`
 
-    - `.data[[varname]]` (also introduce .env pronoun)
-
     - Naming variables using the walrus operator (`:=`)
 
-* Functions that use **unquoted** arguments in a function call
+* Writing functions that use **unquoted** arguments in a function call
 
     -  curly-curly (`{{ }}`)
 
@@ -338,20 +338,34 @@ should be specified in the help file when writing functions more formally
 
 ---
 
-class: inverse, center, middle
-# Option 1: Functions that use quoted arguments in a function call
+# Tidy evaluation
+
+**Tidy evaluation:** A framework for controlling how expressions and variables
+in your code are evaluated by tidyverse functions.
+
+* Useful for passing variable names as inputs to functions
+that use tidyverse packages like `dplyr` and `ggplot2`
 
 ---
 
-# Passing Strings to `dplyr` verbs
+class: inverse, center, middle
+# Option 1: Writing functions that use quoted arguments in a function call
+
+---
+
+# Passing Strings to dplyr verbs
+
+* This means that you want to use any of the `dplyr` verbs in your function,
+and want to pass a string (i.e., the user is supplying a quoted argument)
 
 `dplyr` verbs: 
 
 * `select()`: picks variables based on their names
 
-* `filter()`: picks cases based on their values
+* `group_by()`: converts an existing table to a grouped table, where operations
+are performed by group
 
-* `arrange()`: changes the ordering of the rows
+* `filter()`: picks cases based on their values
 
 * `mutate()`: adds new variables based on existing variables
 
@@ -359,33 +373,59 @@ class: inverse, center, middle
 
 ---
 
-# Passing Strings to `dplyr` verbs
+# Passing Strings to select() 
 
-* This means that you want to use any of the `dplyr` verbs in your function, and want to pass a string.
-
-For example:
+A first attempt:
 
 
 ```r
 # using a function to select a single variable
-my_function &lt;- function(select_variable){
-  mtcars %&gt;% 
+my_select_function &lt;- function(select_variable){
+  gtsummary::trial %&gt;% 
     dplyr::select(select_variable)
 }
 
-my_function(select_variable = "mpg")
-my_function(select_variable = "wt")
-
+my_select_function(select_variable = "trt")
+# this works, but we get a note
 # Note: Using an external vector in selections is ambiguous.
 # i Use `all_of(select_variable)` instead of `select_variable` to silence this message.
 # i See &lt;https://tidyselect.r-lib.org/reference/faq-external-vector.html&gt;.
 ```
 
-Why did we get this note?
+Why did we get this note? *Within the function, it's not clear if the* 
+*select variable is a .data or an .env variable*
 
 ---
 
-# Functions for Passing Strings to `dplyr` verbs
+# Passing Strings to select()
+
+One solution is to clarify that we are indicating that the variable to 
+select is a `.data` variable
+
+We can do that by using `.data[[ · ]]` (`.data` `\(\ne\)` data frame, but is a 
+way of telling R to look for a data variable)
+
+
+```r
+my_select_function &lt;- function(select_variable){
+  gtsummary::trial %&gt;% 
+    dplyr::select(.data[[select_variable]])
+}
+
+my_select_function(select_variable = "trt")
+# A tibble: 200 x 1
+#   trt   
+#   &lt;chr&gt; 
+# 1 Drug A
+# 2 Drug B
+# etc.
+```
+
+---
+
+# Functions for Passing Strings to select()
+
+* If we want to select multiple variables, can utilize the following functions
 
 * `any_of()` and `all_of()` are helper functions to select variables from 
 a character vector
@@ -398,29 +438,194 @@ a character vector
 
 
 ```r
-# using a function to select a single variable
-my_function_improved &lt;- function(select_variable){
-  mtcars %&gt;% 
+# using a function to select multiple variables
+my_select_function &lt;- function(select_variable){
+  gtsummary::trial %&gt;% 
     dplyr::select(dplyr::all_of(select_variable))
 }
 
-my_function_improved(select_variable = "mpg")
-# no note!
+my_select_function(select_variable = c("trt", "age"))
+# A tibble: 200 x 2
+#   trt      age
+#   &lt;chr&gt;  &lt;dbl&gt;
+# 1 Drug A    23
+# 2 Drug B     9
+# etc.
 ```
 
 ---
 
+# Passing Strings to group_by()
+
+A first attempt:
+
+
+```r
+my_group_function &lt;- function(group_vars){
+  gtsummary::trial %&gt;% 
+    dplyr::group_by(group_vars) %&gt;% 
+    dplyr::summarize(n = n())
+}
+
+my_group_function(group_vars = "trt")
+#  Error: Must group by variables found in `.data`.
+# * Column `group_vars` is not found.
+```
+
+---
+
+# Passing Strings to group_by()
+
+* Is there a better way to do this? Why don't `any_of()`/`all_of()` work
+with `group_by`?
+
+
+```r
+my_group_function &lt;- function(group_var){
+  gtsummary::trial %&gt;% 
+    dplyr::group_by(.data[[group_var]]) %&gt;% 
+    dplyr::summarize(n = n())
+}
+
+my_group_function(group_var = "trt")
+# A tibble: 2 x 2
+#   trt        n
+#   &lt;chr&gt;  &lt;int&gt;
+# 1 Drug A    98
+# 2 Drug B   102
+```
+---
+
+# Passing Strings to filter()
+
+A first attempt:
+
+
+```r
+# using a function to select a single variable
+my_filter_function &lt;- function(filter_condition){
+  gtsummary::trial %&gt;% 
+    dplyr::filter(filter_condition)
+}
+
+my_filter_function(filter_condition = "age &gt; 65")
+# Error: Problem with `filter()` input `..1`.
+# i Input `..1` is `filter_condition`.
+# x Input `..1` must be a logical vector, not a character.
+```
+
+Why did we get this note? *The character condition needs to be an expression*
+
+---
+
+# Functions for Passing Strings to filter()
+
+* `parse()`: returns a parsed, but unevaluated expression (i.e., it removes
+the quotation marks)
+
+* `eval()`: evaluates an R expression
+
+
+```r
+my_filter_function &lt;- function(filter_condition){
+  gtsummary::trial %&gt;% 
+    dplyr::filter(eval(parse(text = filter_condition)))
+}
+
+my_filter_function(filter_condition = "age &gt; 65")
+
+# A tibble: 23 x 8
+#   trt      age marker stage grade response death ttdeath
+#   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;fct&gt; &lt;fct&gt;    &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;
+# 1 Drug B    71  0.445 T4    III          0     1    8.71
+# 2 Drug B    67  1.16  T1    II           0     0   24   
+# 3 Drug B    68  0.105 T4    II           0     1   15.4 
+# etc.
+```
+
+---
+
+# Functions for Passing Strings to mutate()
+
+A first attempt: 
+
+
+```r
+my_mutate_function &lt;- function(mutate_var){
+  gtsummary::trial %&gt;% 
+    dplyr::mutate(mean = mean(mutate_var, na.rm = TRUE))
+}
+
+my_mutate_function(mutate_var = "age")
+# mean column entirely missing
+# A tibble: 200 x 9
+#   trt      age marker stage grade response death ttdeath  mean
+#   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;fct&gt; &lt;fct&gt;    &lt;int&gt; &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt;
+# 1 Drug A    23  0.16  T1    II           0     0    24      NA
+# 2 Drug B     9  1.11  T2    I            1     0    24      NA
+# 3 Drug A    31  0.277 T1    II           0     0    24      NA
+# etc.
+
+# Warning message:
+# Problem with `mutate()` column `mean`.
+# i `mean = mean(mutate_var, na.rm = TRUE)`.
+```
+
+---
+
+# Functions for Passing Strings to mutate()
+
+
+```r
+my_mutate_function &lt;- function(mutate_var){
+  gtsummary::trial %&gt;% 
+    dplyr::mutate(mean = mean(.data[[mutate_var]], na.rm = TRUE))
+}
+
+my_mutate_function(mutate_var = "age")
+
+# A tibble: 200 x 9
+#   trt      age marker stage grade response death ttdeath  mean
+#   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;fct&gt; &lt;fct&gt;    &lt;int&gt; &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt;
+# 1 Drug A    23  0.16  T1    II           0     0    24    47.2
+# 2 Drug B     9  1.11  T2    I            1     0    24    47.2
+```
+
+---
+
+# Naming new variables created within your function
+
+* Cue, the walrus operator `:=`
+
+
+```r
+my_naming_function &lt;- function(variable){
+  gtsummary::trial %&gt;% 
+    dplyr::mutate("mean_{variable}" := mean(.data[[variable]], na.rm = TRUE))
+}
+
+my_naming_function(variable = "age")
+# A tibble: 200 x 9
+#  trt      age marker stage grade response death ttdeath mean_age
+#  &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;fct&gt; &lt;fct&gt;    &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;    &lt;dbl&gt;
+# 1 Drug A    23  0.16  T1    II           0     0    24       47.2
+# 2 Drug B     9  1.11  T2    I            1     0    24       47.2
+```
+
+---
 # Functions for Passing Strings to `dplyr` verbs
 
-* `across()`: if you want the user to provide a set of data-variables that are then transformed
-•
+* `across()`: if you want the user to provide a set of data-variables that are
+then transformed
+
 * See `vignette("colwise")`
 
 
 ```r
 summarise_mean &lt;- function(data, vars) {
   data %&gt;% 
-    summarise(n = n(), across({{ vars }}, mean))
+    summarise(n = n(), 
+              across({{ vars }}, mean))
 }
 
 mtcars %&gt;% 
@@ -448,23 +653,6 @@ my_summarise &lt;- function(data, group_var, summarise_var) {
 }
 ```
 
-
----
-
-# `.data[[ · ]]`
-
-* `.data` `\(\ne\)` data frame
-
-* In `{tidyverse}` speak, `.data` is a *pronoun*
-
-* Used as `.data$x` or `.data[[var]]`
-
----
-
-# Naming variables within your function
-
-* Cue, the walrus operator `:=`
-
 ---
 
 class: inverse, center, middle
@@ -480,7 +668,7 @@ class: inverse, center, middle
 
 
 class: inverse, center, middle
-# Option 2: Functions that use unquoted arguments in the function call
+# Option 2: Writing functions that use unquoted arguments in the function call
 
 ---
 # Why do I need `{{ · }}`?
@@ -613,6 +801,11 @@ class: inverse, center, middle
 
 ---
 
+
+
+
+
+
 class: inverse, center, middle
 # Let's Practice
 
@@ -650,6 +843,105 @@ my_mean(data, variable) {
 
 ---
 
+# Practice with {ggplot}
+
+Write a function that uses `{ggplot}` to create a scatterplot of age versus
+marker value, where you can vary:
+
+* The subset of the data that is plotted (e.g., trt = Drug A or age &gt; 65)
+
+* The variable used to color code the points (stage or grade)
+
+---
+
+# Step 1
+
+Write ggplot code that works and is close to what we want
+
+
+```r
+library(ggplot2)
+
+gtsummary::trial %&gt;% 
+  dplyr::filter(trt == "Drug A") %&gt;% 
+  ggplot(aes(x = age,
+             y = marker, 
+             color = stage)) +
+  geom_point()
+```
+
+![](index_files/figure-html/unnamed-chunk-38-1.png)&lt;!-- --&gt;
+
+---
+
+# Step 2
+
+Put the working code into a function (haven't yet used function arguments)
+
+
+```r
+plot_age_marker &lt;- function(filter_condition, color_variable){
+  gtsummary::trial %&gt;% 
+    dplyr::filter(trt == "Drug A") %&gt;% 
+    ggplot(aes(x = age,
+             y = marker, 
+             color = stage)) +
+    geom_point()
+}
+```
+
+---
+
+# Step 3
+
+Replace the value of stage with the color_variable function input
+
+
+```r
+plot_age_marker &lt;- function(filter_condition, color_variable){
+  gtsummary::trial %&gt;% 
+    dplyr::filter(eval(parse(text = filter_condition))) %&gt;% 
+    ggplot(aes(x = age,
+             y = marker, 
+             color = .data[[color_variable]])) +
+    geom_point()
+}
+```
+
+---
+
+# Try to run our function
+
+
+```r
+# try to run our function
+plot_age_marker(filter_condition = "age &gt; 40",
+                color_variable = "stage")
+```
+
+![](index_files/figure-html/unnamed-chunk-41-1.png)&lt;!-- --&gt;
+
+```r
+# success!
+```
+
+---
+
+# Try to run our function
+
+Now, what if we want to subset the data based on a categorical variable?
+
+
+```r
+# try to run our function with an input that requires quotation marks
+plot_age_marker(filter_condition = trt == "Drug A",
+                color_variable = "stage")
+```
+
+
+
+---
+
 # Resources
 
 * [Tidy Evaluation: Getting up to Speed](https://tidyeval.tidyverse.org/sec-up-to-speed.html)
@@ -663,6 +955,8 @@ my_mean(data, variable) {
 * [Using ggplot2 in packages](https://ggplot2.tidyverse.org/articles/ggplot2-in-packages.html)
 
 * [Functional Programming: Tidy Evaluation](https://dcl-prog.stanford.edu/tidy-eval-detailed.html)
+
+* [GitHub repo for this presentation](https://github.com/MSKCC-Epi-Bio/Writing-Function-with-the-tidyverse)
 
 Advanced:
 

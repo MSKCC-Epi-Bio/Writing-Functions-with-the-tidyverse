@@ -35,20 +35,34 @@ should be specified in the help file when writing functions more formally
 
 ---
 
-class: inverse, center, middle
-# Option 1: Functions that use quoted arguments in a function call
+# Tidy evaluation
+
+**Tidy evaluation:** A framework for controlling how expressions and variables
+in your code are evaluated by tidyverse functions.
+
+* Useful for passing variable names as inputs to functions
+that use tidyverse packages like `dplyr` and `ggplot2`
 
 ---
 
-# Passing Strings to `dplyr` verbs
+class: inverse, center, middle
+# Option 1: Writing functions that use quoted arguments in a function call
+
+---
+
+# Passing Strings to dplyr verbs
+
+* This means that you want to use any of the `dplyr` verbs in your function,
+and want to pass a string (i.e., the user is supplying a quoted argument)
 
 `dplyr` verbs: 
 
 * `select()`: picks variables based on their names
 
-* `filter()`: picks cases based on their values
+* `group_by()`: converts an existing table to a grouped table, where operations
+are performed by group
 
-* `arrange()`: changes the ordering of the rows
+* `filter()`: picks cases based on their values
 
 * `mutate()`: adds new variables based on existing variables
 
@@ -56,32 +70,57 @@ class: inverse, center, middle
 
 ---
 
-# Passing Strings to `dplyr` verbs
+# Passing Strings to select() 
 
-* This means that you want to use any of the `dplyr` verbs in your function, and want to pass a string.
-
-For example:
+A first attempt:
 
 ```{r, eval = FALSE}
 # using a function to select a single variable
-my_function <- function(select_variable){
-  mtcars %>% 
+my_select_function <- function(select_variable){
+  gtsummary::trial %>% 
     dplyr::select(select_variable)
 }
 
-my_function(select_variable = "mpg")
-my_function(select_variable = "wt")
-
+my_select_function(select_variable = "trt")
+# this works, but we get a note
 # Note: Using an external vector in selections is ambiguous.
 # i Use `all_of(select_variable)` instead of `select_variable` to silence this message.
 # i See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
 ```
 
-Why did we get this note?
+Why did we get this note? *Within the function, it's not clear if the* 
+*select variable is a .data or an .env variable*
 
 ---
 
-# Functions for Passing Strings to `dplyr` verbs
+# Passing Strings to select()
+
+One solution is to clarify that we are indicating that the variable to 
+select is a `.data` variable
+
+We can do that by using `.data[[ · ]]` (`.data` $\ne$ data frame, but is a 
+way of telling R to look for a data variable)
+
+```{r, eval=FALSE}
+my_select_function <- function(select_variable){
+  gtsummary::trial %>% 
+    dplyr::select(.data[[select_variable]])
+}
+
+my_select_function(select_variable = "trt")
+# A tibble: 200 x 1
+#   trt   
+#   <chr> 
+# 1 Drug A
+# 2 Drug B
+# etc.
+```
+
+---
+
+# Functions for Passing Strings to select()
+
+* If we want to select multiple variables, can utilize the following functions
 
 * `any_of()` and `all_of()` are helper functions to select variables from 
 a character vector
@@ -93,28 +132,186 @@ a character vector
 * Can also use `!all_of()` to select all variables not found in the character vector supplied to `all_of()`
 
 ```{r, eval = FALSE}
-# using a function to select a single variable
-my_function_improved <- function(select_variable){
-  mtcars %>% 
+# using a function to select multiple variables
+my_select_function <- function(select_variable){
+  gtsummary::trial %>% 
     dplyr::select(dplyr::all_of(select_variable))
 }
 
-my_function_improved(select_variable = "mpg")
-# no note!
+my_select_function(select_variable = c("trt", "age"))
+# A tibble: 200 x 2
+#   trt      age
+#   <chr>  <dbl>
+# 1 Drug A    23
+# 2 Drug B     9
+# etc.
 ```
 
 ---
 
+# Passing Strings to group_by()
+
+A first attempt:
+
+```{r, eval=FALSE}
+my_group_function <- function(group_vars){
+  gtsummary::trial %>% 
+    dplyr::group_by(group_vars) %>% 
+    dplyr::summarize(n = n())
+}
+
+my_group_function(group_vars = "trt")
+#  Error: Must group by variables found in `.data`.
+# * Column `group_vars` is not found.
+```
+
+---
+
+# Passing Strings to group_by()
+
+* Is there a better way to do this? Why don't `any_of()`/`all_of()` work
+with `group_by`?
+
+```{r, eval=FALSE}
+my_group_function <- function(group_var){
+  gtsummary::trial %>% 
+    dplyr::group_by(.data[[group_var]]) %>% 
+    dplyr::summarize(n = n())
+}
+
+my_group_function(group_var = "trt")
+# A tibble: 2 x 2
+#   trt        n
+#   <chr>  <int>
+# 1 Drug A    98
+# 2 Drug B   102
+```
+---
+
+# Passing Strings to filter()
+
+A first attempt:
+
+```{r, eval = FALSE}
+# using a function to select a single variable
+my_filter_function <- function(filter_condition){
+  gtsummary::trial %>% 
+    dplyr::filter(filter_condition)
+}
+
+my_filter_function(filter_condition = "age > 65")
+# Error: Problem with `filter()` input `..1`.
+# i Input `..1` is `filter_condition`.
+# x Input `..1` must be a logical vector, not a character.
+```
+
+Why did we get this note? *The character condition needs to be an expression*
+
+---
+
+# Functions for Passing Strings to filter()
+
+* `parse()`: returns a parsed, but unevaluated expression (i.e., it removes
+the quotation marks)
+
+* `eval()`: evaluates an R expression
+
+```{r, eval = FALSE}
+my_filter_function <- function(filter_condition){
+  gtsummary::trial %>% 
+    dplyr::filter(eval(parse(text = filter_condition)))
+}
+
+my_filter_function(filter_condition = "age > 65")
+
+# A tibble: 23 x 8
+#   trt      age marker stage grade response death ttdeath
+#   <chr>  <dbl>  <dbl> <fct> <fct>    <int> <int>   <dbl>
+# 1 Drug B    71  0.445 T4    III          0     1    8.71
+# 2 Drug B    67  1.16  T1    II           0     0   24   
+# 3 Drug B    68  0.105 T4    II           0     1   15.4 
+# etc.
+```
+
+---
+
+# Functions for Passing Strings to mutate()
+
+A first attempt: 
+
+```{r, eval=FALSE}
+my_mutate_function <- function(mutate_var){
+  gtsummary::trial %>% 
+    dplyr::mutate(mean = mean(mutate_var, na.rm = TRUE))
+}
+
+my_mutate_function(mutate_var = "age")
+# mean column entirely missing
+# A tibble: 200 x 9
+#   trt      age marker stage grade response death ttdeath  mean
+#   <chr>  <dbl>  <dbl> <fct> <fct>    <int> <int>   <dbl> <dbl>
+# 1 Drug A    23  0.16  T1    II           0     0    24      NA
+# 2 Drug B     9  1.11  T2    I            1     0    24      NA
+# 3 Drug A    31  0.277 T1    II           0     0    24      NA
+# etc.
+
+# Warning message:
+# Problem with `mutate()` column `mean`.
+# i `mean = mean(mutate_var, na.rm = TRUE)`.
+```
+
+---
+
+# Functions for Passing Strings to mutate()
+
+```{r, eval=FALSE}
+my_mutate_function <- function(mutate_var){
+  gtsummary::trial %>% 
+    dplyr::mutate(mean = mean(.data[[mutate_var]], na.rm = TRUE))
+}
+
+my_mutate_function(mutate_var = "age")
+
+# A tibble: 200 x 9
+#   trt      age marker stage grade response death ttdeath  mean
+#   <chr>  <dbl>  <dbl> <fct> <fct>    <int> <int>   <dbl> <dbl>
+# 1 Drug A    23  0.16  T1    II           0     0    24    47.2
+# 2 Drug B     9  1.11  T2    I            1     0    24    47.2
+```
+
+---
+
+# Naming new variables created within your function
+
+* Cue, the walrus operator `:=`
+
+```{r, eval=FALSE}
+my_naming_function <- function(variable){
+  gtsummary::trial %>% 
+    dplyr::mutate("mean_{variable}" := mean(.data[[variable]], na.rm = TRUE))
+}
+
+my_naming_function(variable = "age")
+# A tibble: 200 x 9
+#  trt      age marker stage grade response death ttdeath mean_age
+#  <chr>  <dbl>  <dbl> <fct> <fct>    <int> <int>   <dbl>    <dbl>
+# 1 Drug A    23  0.16  T1    II           0     0    24       47.2
+# 2 Drug B     9  1.11  T2    I            1     0    24       47.2
+```
+
+---
 # Functions for Passing Strings to `dplyr` verbs
 
-* `across()`: if you want the user to provide a set of data-variables that are then transformed
-•
+* `across()`: if you want the user to provide a set of data-variables that are
+then transformed
+
 * See `vignette("colwise")`
 
 ```{r, eval = FALSE}
 summarise_mean <- function(data, vars) {
   data %>% 
-    summarise(n = n(), across({{ vars }}, mean))
+    summarise(n = n(), 
+              across({{ vars }}, mean))
 }
 
 mtcars %>% 
@@ -122,7 +319,7 @@ mtcars %>%
   summarise_mean(where(is.numeric))
 ```
 
-```{r}
+```{r, eval=FALSE}
 my_summarise <- function(data, group_var, summarise_var) {
   data %>%
     group_by(across({{ group_var }})) %>% 
@@ -139,23 +336,6 @@ my_summarise <- function(data, group_var, summarise_var) {
     summarise(across({{ summarise_var }}, mean, .names = "mean_{.col}"))
 }
 ```
-
-
----
-
-# `.data[[ · ]]`
-
-* `.data` $\ne$ data frame
-
-* In `{tidyverse}` speak, `.data` is a *pronoun*
-
-* Used as `.data$x` or `.data[[var]]`
-
----
-
-# Naming variables within your function
-
-* Cue, the walrus operator `:=`
 
 ---
 

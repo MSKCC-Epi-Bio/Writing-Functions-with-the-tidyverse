@@ -1,3 +1,8 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 class: inverse, center, middle
 # Let's Practice
 
@@ -29,3 +34,91 @@ my_mean(data, variable) {
   variable_chr <- ()
 }
 ```
+
+---
+
+# Practice with {ggplot}
+
+Write a function that uses `{ggplot}` to create a scatterplot of age versus
+marker value, where you can vary:
+
+* The subset of the data that is plotted (e.g., trt = Drug A or age > 65)
+
+* The variable used to color code the points (stage or grade)
+
+---
+
+# Step 1
+
+Write ggplot code that works and is close to what we want
+
+```{r, fig.height=3}
+library(ggplot2)
+
+gtsummary::trial %>% 
+  dplyr::filter(trt == "Drug A") %>% 
+  ggplot(aes(x = age,
+             y = marker, 
+             color = stage)) +
+  geom_point()
+```
+
+---
+
+# Step 2
+
+Put the working code into a function (haven't yet used function arguments)
+
+```{r, eval=FALSE}
+plot_age_marker <- function(filter_condition, color_variable){
+  gtsummary::trial %>% 
+    dplyr::filter(trt == "Drug A") %>% 
+    ggplot(aes(x = age,
+             y = marker, 
+             color = stage)) +
+    geom_point()
+}
+```
+
+---
+
+# Step 3
+
+Replace the value of stage with the color_variable function input
+
+```{r}
+plot_age_marker <- function(filter_condition, color_variable){
+  gtsummary::trial %>% 
+    dplyr::filter(eval(parse(text = filter_condition))) %>% 
+    ggplot(aes(x = age,
+             y = marker, 
+             color = .data[[color_variable]])) +
+    geom_point()
+}
+```
+
+---
+
+# Try to run our function
+
+```{r, fig.height=4}
+# try to run our function
+plot_age_marker(filter_condition = "age > 40",
+                color_variable = "stage")
+```
+
+---
+
+# Try to run our function
+
+Now, what if we want to subset the data based on a categorical variable?
+
+* need to make this work.
+
+```{r, eval = FALSE}
+# try to run our function with an input that requires quotation marks
+plot_age_marker(filter_condition = trt == "Drug A",
+                color_variable = "stage")
+```
+
+

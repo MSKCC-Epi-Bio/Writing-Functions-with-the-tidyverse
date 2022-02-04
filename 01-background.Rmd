@@ -30,17 +30,17 @@ Be able to write a function that utilizes `{tidyverse}` functions (e.g.,
 
 * Function Basics
 
-* Functions that use **quoted** arguments in a function call
+* Writing functions that use **quoted** arguments in a function call
 
     - Passing strings to `dplyr` verbs
+  
+    - `.data[[varname]]`
 
     - `across()` and `any_of()` and `all_of()`
 
-    - `.data[[varname]]` (also introduce .env pronoun)
-
     - Naming variables using the walrus operator (`:=`)
 
-* Functions that use **unquoted** arguments in a function call
+* Writing functions that use **unquoted** arguments in a function call
 
     -  curly-curly (`{{ }}`)
 

@@ -12,6 +12,8 @@
 
 * [Functional Programming: Tidy Evaluation](https://dcl-prog.stanford.edu/tidy-eval-detailed.html)
 
+* [GitHub repo for this presentation](https://github.com/MSKCC-Epi-Bio/Writing-Function-with-the-tidyverse)
+
 Advanced:
 
 * [rlang](https://rlang.r-lib.org/) (the underlying package that implements tidy evaluation)
