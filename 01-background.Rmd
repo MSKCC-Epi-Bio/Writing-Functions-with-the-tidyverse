@@ -151,8 +151,6 @@ gtsummary::trial %>%
 #   <chr> 
 # 1 Drug A
 # 2 Drug B
-# 3 Drug A
-# 4 Drug A
 # etc.
 ```
 

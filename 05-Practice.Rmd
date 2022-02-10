@@ -40,11 +40,25 @@ my_mean(data, variable) {
 # Practice with {ggplot}
 
 Write a function that uses `{ggplot}` to create a scatterplot of age versus
-marker value, where you can vary:
+marker value from the `gtsummary::trial` dataset, where you can vary:
 
 * The subset of the data that is plotted (e.g., trt = Drug A or age > 65)
 
 * The variable used to color code the points (stage or grade)
+
+```{r, eval=FALSE}
+head(gtsummary::trial)
+# A tibble: 6 x 8
+#   trt      age marker stage grade response death ttdeath
+#   <chr>  <dbl>  <dbl> <fct> <fct>    <int> <int>   <dbl>
+# 1 Drug A    23  0.16  T1    II           0     0    24  
+# 2 Drug B     9  1.11  T2    I            1     0    24  
+# 3 Drug A    31  0.277 T1    II           0     0    24  
+# 4 Drug A    NA  2.07  T3    III          1     1    17.6
+# 5 Drug A    51  2.77  T4    III          1     1    16.4
+# 6 Drug B    39  0.613 T4    I            0     1    15.6
+```
+
 
 ---
 
@@ -89,7 +103,7 @@ Replace the value of stage with the color_variable function input
 ```{r}
 plot_age_marker <- function(filter_condition, color_variable){
   gtsummary::trial %>% 
-    dplyr::filter(eval(parse(text = filter_condition))) %>% 
+    dplyr::filter(rlang::eval_bare(rlang::parse_expr(filter_condition))) %>% 
     ggplot(aes(x = age,
              y = marker, 
              color = .data[[color_variable]])) +
@@ -117,7 +131,7 @@ Now, what if we want to subset the data based on a categorical variable?
 
 ```{r, eval = FALSE}
 # try to run our function with an input that requires quotation marks
-plot_age_marker(filter_condition = trt == "Drug A",
+plot_age_marker(filter_condition = "trt == "Drug A"",
                 color_variable = "stage")
 ```
 

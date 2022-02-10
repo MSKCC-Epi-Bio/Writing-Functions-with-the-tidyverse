@@ -195,8 +195,6 @@ gtsummary::trial %&gt;%
 #   &lt;chr&gt; 
 # 1 Drug A
 # 2 Drug B
-# 3 Drug A
-# 4 Drug A
 # etc.
 ```
 
@@ -369,8 +367,6 @@ are performed by group
 
 * `mutate()`: adds new variables based on existing variables
 
-*From [dplyr website](https://dplyr.tidyverse.org/)
-
 ---
 
 # Passing Strings to select() 
@@ -520,16 +516,17 @@ Why did we get this note? *The character condition needs to be an expression*
 
 # Functions for Passing Strings to filter()
 
-* `parse()`: returns a parsed, but unevaluated expression (i.e., it removes
-the quotation marks)
+* `rlang::parse_expr()`: transforms text into an un-evaluated expression 
+(i.e., it removes the quotation marks)
 
-* `eval()`: evaluates an R expression
+* `rlang::eval_bare()`: Evaluates the expression
+
 
 
 ```r
 my_filter_function &lt;- function(filter_condition){
   gtsummary::trial %&gt;% 
-    dplyr::filter(eval(parse(text = filter_condition)))
+    dplyr::filter(rlang::eval_bare(rlang::parse_expr(filter_condition)))
 }
 
 my_filter_function(filter_condition = "age &gt; 65")
@@ -596,6 +593,8 @@ my_mutate_function(mutate_var = "age")
 # Naming new variables created within your function
 
 * Cue, the walrus operator `:=`
+
+* Part of the `rlang` package
 
 
 ```r
@@ -846,11 +845,26 @@ my_mean(data, variable) {
 # Practice with {ggplot}
 
 Write a function that uses `{ggplot}` to create a scatterplot of age versus
-marker value, where you can vary:
+marker value from the `gtsummary::trial` dataset, where you can vary:
 
 * The subset of the data that is plotted (e.g., trt = Drug A or age &gt; 65)
 
 * The variable used to color code the points (stage or grade)
+
+
+```r
+head(gtsummary::trial)
+# A tibble: 6 x 8
+#   trt      age marker stage grade response death ttdeath
+#   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;fct&gt; &lt;fct&gt;    &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;
+# 1 Drug A    23  0.16  T1    II           0     0    24  
+# 2 Drug B     9  1.11  T2    I            1     0    24  
+# 3 Drug A    31  0.277 T1    II           0     0    24  
+# 4 Drug A    NA  2.07  T3    III          1     1    17.6
+# 5 Drug A    51  2.77  T4    III          1     1    16.4
+# 6 Drug B    39  0.613 T4    I            0     1    15.6
+```
+
 
 ---
 
@@ -870,7 +884,7 @@ gtsummary::trial %&gt;%
   geom_point()
 ```
 
-![](index_files/figure-html/unnamed-chunk-38-1.png)&lt;!-- --&gt;
+![](index_files/figure-html/unnamed-chunk-39-1.png)&lt;!-- --&gt;
 
 ---
 
@@ -900,7 +914,7 @@ Replace the value of stage with the color_variable function input
 ```r
 plot_age_marker &lt;- function(filter_condition, color_variable){
   gtsummary::trial %&gt;% 
-    dplyr::filter(eval(parse(text = filter_condition))) %&gt;% 
+    dplyr::filter(rlang::eval_bare(rlang::parse_expr(filter_condition))) %&gt;% 
     ggplot(aes(x = age,
              y = marker, 
              color = .data[[color_variable]])) +
@@ -919,11 +933,7 @@ plot_age_marker(filter_condition = "age &gt; 40",
                 color_variable = "stage")
 ```
 
-![](index_files/figure-html/unnamed-chunk-41-1.png)&lt;!-- --&gt;
-
-```r
-# success!
-```
+![](index_files/figure-html/unnamed-chunk-42-1.png)&lt;!-- --&gt;
 
 ---
 
@@ -931,10 +941,12 @@ plot_age_marker(filter_condition = "age &gt; 40",
 
 Now, what if we want to subset the data based on a categorical variable?
 
+* need to make this work.
+
 
 ```r
 # try to run our function with an input that requires quotation marks
-plot_age_marker(filter_condition = trt == "Drug A",
+plot_age_marker(filter_condition = "trt == "Drug A"",
                 color_variable = "stage")
 ```
 

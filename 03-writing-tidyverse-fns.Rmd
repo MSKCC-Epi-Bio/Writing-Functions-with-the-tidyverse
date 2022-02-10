@@ -66,8 +66,6 @@ are performed by group
 
 * `mutate()`: adds new variables based on existing variables
 
-*From [dplyr website](https://dplyr.tidyverse.org/)
-
 ---
 
 # Passing Strings to select() 
@@ -211,15 +209,16 @@ Why did we get this note? *The character condition needs to be an expression*
 
 # Functions for Passing Strings to filter()
 
-* `parse()`: returns a parsed, but unevaluated expression (i.e., it removes
-the quotation marks)
+* `rlang::parse_expr()`: transforms text into an un-evaluated expression 
+(i.e., it removes the quotation marks)
 
-* `eval()`: evaluates an R expression
+* `rlang::eval_bare()`: Evaluates the expression
+
 
 ```{r, eval = FALSE}
 my_filter_function <- function(filter_condition){
   gtsummary::trial %>% 
-    dplyr::filter(eval(parse(text = filter_condition)))
+    dplyr::filter(rlang::eval_bare(rlang::parse_expr(filter_condition)))
 }
 
 my_filter_function(filter_condition = "age > 65")
@@ -285,6 +284,8 @@ my_mutate_function(mutate_var = "age")
 
 * Cue, the walrus operator `:=`
 
+* Part of the `rlang` package
+
 ```{r, eval=FALSE}
 my_naming_function <- function(variable){
   gtsummary::trial %>% 
@@ -300,7 +301,7 @@ my_naming_function(variable = "age")
 ```
 
 ---
-# Functions for Passing Strings to `dplyr` verbs
+# Functions for Passing Strings to dplyr verbs
 
 * `across()`: if you want the user to provide a set of data-variables that are
 then transformed
