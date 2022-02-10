@@ -10,10 +10,6 @@ class: inverse, center, middle
 
 ---
 
-# Writing functions that involve base R and the `{tidyverse}`
-
----
-
 # rlang
 
 * Examples for when you can't use the walrus operator and have to use
@@ -40,6 +36,10 @@ mtcars %>%
 ```
 
 * Can also be used to name variables within functions
+
+---
+
+# rlang
 
 * Can use `rlang::expr()` to see what `rlang::sym()` is evaluating to
 

@@ -36,7 +36,7 @@ Be able to write a function that utilizes `{tidyverse}` functions (e.g.,
   
     - `.data[[varname]]`
 
-    - `across()` and `any_of()` and `all_of()`
+    - `any_of()`, `all_of()` and `across()`
 
     - Naming variables using the walrus operator (`:=`)
 
@@ -44,8 +44,6 @@ Be able to write a function that utilizes `{tidyverse}` functions (e.g.,
 
     -  curly-curly (`{{ }}`)
 
-    - `enquo()` and bang-bang (`!!`)
-    
 ---
 
 # Outline

@@ -58,10 +58,6 @@ class: inverse, center, title-slide, middle
 ```
 
 ---
-```{r child='02-using-tidyverse-fns.Rmd'}
-```
-
----
 ```{r child='03-writing-tidyverse-fns.Rmd'}
 ```
 

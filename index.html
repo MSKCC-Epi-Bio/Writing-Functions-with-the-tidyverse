@@ -77,7 +77,7 @@ Be able to write a function that utilizes `{tidyverse}` functions (e.g.,
   
     - `.data[[varname]]`
 
-    - `across()` and `any_of()` and `all_of()`
+    - `any_of()`, `all_of()` and `across()`
 
     - Naming variables using the walrus operator (`:=`)
 
@@ -85,8 +85,6 @@ Be able to write a function that utilizes `{tidyverse}` functions (e.g.,
 
     -  curly-curly (`{{ }}`)
 
-    - `enquo()` and bang-bang (`!!`)
-    
 ---
 
 # Outline
@@ -288,15 +286,6 @@ code, but introduces problems when writing functions.
 
 ---
 
-class: inverse, center, middle
-# Using tidyverse-style Functions
-
----
-
-*What did we want to put here?*
-
----
-
 
 
 
@@ -333,6 +322,9 @@ preference
 
 * The type of argument required by the function (quoted or unquoted)
 should be specified in the help file when writing functions more formally
+
+* Note: `tbl_summary()` is unique in that it takes both quoted and unquoted 
+arguments. This is more work for the developer and isn't necessarily recommended.
 
 ---
 
@@ -472,23 +464,46 @@ my_group_function(group_vars = "trt")
 
 # Passing Strings to group_by()
 
-* Is there a better way to do this? Why don't `any_of()`/`all_of()` work
-with `group_by`?
+* Passing a single variable to group by
 
 
 ```r
 my_group_function &lt;- function(group_var){
   gtsummary::trial %&gt;% 
-    dplyr::group_by(.data[[group_var]]) %&gt;% 
-    dplyr::summarize(n = n())
+    dplyr::group_by(.data[[group_var]])
 }
 
 my_group_function(group_var = "trt")
-# A tibble: 2 x 2
-#   trt        n
-#   &lt;chr&gt;  &lt;int&gt;
-# 1 Drug A    98
-# 2 Drug B   102
+# A tibble: 200 x 8
+# Groups:   trt [2]
+#   trt      age marker stage grade response death ttdeath
+#   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;fct&gt; &lt;fct&gt;    &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;
+# 1 Drug A    23  0.16  T1    II           0     0    24  
+# 2 Drug B     9  1.11  T2    I            1     0    24 
+```
+---
+
+# Passing Strings to group_by()
+
+* Passing multiple variables to group by 
+
+* `across()`: allows you to use `select()` semantics inside in data-masking
+functions
+
+
+```r
+my_group_function &lt;- function(group_vars){
+  gtsummary::trial %&gt;% 
+    dplyr::group_by(across(group_vars))
+}
+
+my_group_function(group_vars = c("trt", "stage"))
+# A tibble: 200 x 8
+# Groups:   trt, stage [8]
+#   trt      age marker stage grade response death ttdeath
+#   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;fct&gt; &lt;fct&gt;    &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;
+# 1 Drug A    23  0.16  T1    II           0     0    24  
+# 2 Drug B     9  1.11  T2    I            1     0    24  
 ```
 ---
 
@@ -516,17 +531,19 @@ Why did we get this note? *The character condition needs to be an expression*
 
 # Functions for Passing Strings to filter()
 
-* `rlang::parse_expr()`: transforms text into an un-evaluated expression 
+* `parse()`: transforms text into an un-evaluated expression 
 (i.e., it removes the quotation marks)
 
-* `rlang::eval_bare()`: Evaluates the expression
+* `eval()`: Evaluates the expression
+
+* Can alternatively use `rlang::eval_tidy()` &amp; `rlang::parse_expr()`
 
 
 
 ```r
 my_filter_function &lt;- function(filter_condition){
   gtsummary::trial %&gt;% 
-    dplyr::filter(rlang::eval_bare(rlang::parse_expr(filter_condition)))
+    dplyr::filter(eval(parse(text = filter_condition)))
 }
 
 my_filter_function(filter_condition = "age &gt; 65")
@@ -596,6 +613,9 @@ my_mutate_function(mutate_var = "age")
 
 * Part of the `rlang` package
 
+* `{glue}` syntax is automatically recognized on the left-hand side of the  
+walrus operator
+
 
 ```r
 my_naming_function &lt;- function(variable){
@@ -612,7 +632,7 @@ my_naming_function(variable = "age")
 ```
 
 ---
-# Functions for Passing Strings to `dplyr` verbs
+# Functions for Passing Strings to dplyr verbs
 
 * `across()`: if you want the user to provide a set of data-variables that are
 then transformed
@@ -768,21 +788,6 @@ my_mean(mtcars, cyl, am)
 #&gt; 1                                   6.59
 ```
 
-## Using the names of arguments in the output
-
-* Use `{glue}` syntax in conjunction with `:=` (the walrus operator)
-
-
-```r
-my_summarise4 &lt;- function(data, expr) {
-  data %&gt;% summarise(
-    "mean_{{expr}}" := mean({{ expr }}),
-    "sum_{{expr}}" := sum({{ expr }}),
-    "n_{{expr}}" := n()
-  )
-}
-```
-
 ---
 
 # Conclusion
@@ -791,6 +796,8 @@ my_summarise4 &lt;- function(data, expr) {
   
 2. When writing functions using the `{tidyverse}`, need to account for the back-end
 design of the `{tidyverse}`, namely data masking
+
+3. This is tricky! (and not super consistent)
 
 ---
 
@@ -807,38 +814,6 @@ class: inverse, center, middle
 
 class: inverse, center, middle
 # Let's Practice
-
----
-# Let's Practice
-
-Write a function that accepts a data frame, an unquoted variable name as arguments, and returns the column's mean.
-
-- Use `{{ }}` to capture the input
-
-
-```r
-my_mean(data, variable) {
-  data %&gt;% dplyr::pull() %&gt;% mean()
-}
-```
-
-- Convert unquoted variable name to a string and implement using `.data` + `dplyr:summarize()`
-
-
-```r
-my_mean(data, variable) {
-  variable_chr &lt;- ()
-}
-```
-
-- Convert unquoted variable name to a string and implement directly in `mean()`
-
-
-```r
-my_mean(data, variable) {
-  variable_chr &lt;- ()
-}
-```
 
 ---
 
@@ -865,6 +840,10 @@ head(gtsummary::trial)
 # 6 Drug B    39  0.613 T4    I            0     1    15.6
 ```
 
+---
+# Step 1
+
+Write ggplot code that works and is close to what we want
 
 ---
 
@@ -884,7 +863,13 @@ gtsummary::trial %&gt;%
   geom_point()
 ```
 
-![](index_files/figure-html/unnamed-chunk-39-1.png)&lt;!-- --&gt;
+![](index_files/figure-html/unnamed-chunk-35-1.png)&lt;!-- --&gt;
+
+---
+
+# Step 2
+
+Put the working code into a function (haven't yet used function arguments)
 
 ---
 
@@ -903,6 +888,12 @@ plot_age_marker &lt;- function(filter_condition, color_variable){
     geom_point()
 }
 ```
+
+---
+
+# Step 3
+
+Replace the value of stage with the color_variable function input
 
 ---
 
@@ -933,7 +924,7 @@ plot_age_marker(filter_condition = "age &gt; 40",
                 color_variable = "stage")
 ```
 
-![](index_files/figure-html/unnamed-chunk-42-1.png)&lt;!-- --&gt;
+![](index_files/figure-html/unnamed-chunk-38-1.png)&lt;!-- --&gt;
 
 ---
 
@@ -941,15 +932,19 @@ plot_age_marker(filter_condition = "age &gt; 40",
 
 Now, what if we want to subset the data based on a categorical variable?
 
-* need to make this work.
-
 
 ```r
-# try to run our function with an input that requires quotation marks
-plot_age_marker(filter_condition = "trt == "Drug A"",
+plot_age_marker(filter_condition = 'trt == "Drug A"',
                 color_variable = "stage")
 ```
 
+
+```r
+plot_age_marker(filter_condition = "trt == \"Drug A\"",
+                color_variable = "stage")
+```
+
+![](index_files/figure-html/unnamed-chunk-40-1.png)&lt;!-- --&gt;
 
 
 ---
@@ -990,10 +985,6 @@ class: inverse, center, middle
 
 ---
 
-# Writing functions that involve base R and the `{tidyverse}`
-
----
-
 # rlang
 
 * Examples for when you can't use the walrus operator and have to use
@@ -1021,6 +1012,10 @@ mtcars %&gt;%
 ```
 
 * Can also be used to name variables within functions
+
+---
+
+# rlang
 
 * Can use `rlang::expr()` to see what `rlang::sym()` is evaluating to
 

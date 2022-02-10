@@ -33,6 +33,9 @@ preference
 * The type of argument required by the function (quoted or unquoted)
 should be specified in the help file when writing functions more formally
 
+* Note: `tbl_summary()` is unique in that it takes both quoted and unquoted 
+arguments. This is more work for the developer and isn't necessarily recommended.
+
 ---
 
 # Tidy evaluation
@@ -167,22 +170,44 @@ my_group_function(group_vars = "trt")
 
 # Passing Strings to group_by()
 
-* Is there a better way to do this? Why don't `any_of()`/`all_of()` work
-with `group_by`?
+* Passing a single variable to group by
 
 ```{r, eval=FALSE}
 my_group_function <- function(group_var){
   gtsummary::trial %>% 
-    dplyr::group_by(.data[[group_var]]) %>% 
-    dplyr::summarize(n = n())
+    dplyr::group_by(.data[[group_var]])
 }
 
 my_group_function(group_var = "trt")
-# A tibble: 2 x 2
-#   trt        n
-#   <chr>  <int>
-# 1 Drug A    98
-# 2 Drug B   102
+# A tibble: 200 x 8
+# Groups:   trt [2]
+#   trt      age marker stage grade response death ttdeath
+#   <chr>  <dbl>  <dbl> <fct> <fct>    <int> <int>   <dbl>
+# 1 Drug A    23  0.16  T1    II           0     0    24  
+# 2 Drug B     9  1.11  T2    I            1     0    24 
+```
+---
+
+# Passing Strings to group_by()
+
+* Passing multiple variables to group by 
+
+* `across()`: allows you to use `select()` semantics inside in data-masking
+functions
+
+```{r, eval=FALSE}
+my_group_function <- function(group_vars){
+  gtsummary::trial %>% 
+    dplyr::group_by(across(group_vars))
+}
+
+my_group_function(group_vars = c("trt", "stage"))
+# A tibble: 200 x 8
+# Groups:   trt, stage [8]
+#   trt      age marker stage grade response death ttdeath
+#   <chr>  <dbl>  <dbl> <fct> <fct>    <int> <int>   <dbl>
+# 1 Drug A    23  0.16  T1    II           0     0    24  
+# 2 Drug B     9  1.11  T2    I            1     0    24  
 ```
 ---
 
@@ -209,16 +234,18 @@ Why did we get this note? *The character condition needs to be an expression*
 
 # Functions for Passing Strings to filter()
 
-* `rlang::parse_expr()`: transforms text into an un-evaluated expression 
+* `parse()`: transforms text into an un-evaluated expression 
 (i.e., it removes the quotation marks)
 
-* `rlang::eval_bare()`: Evaluates the expression
+* `eval()`: Evaluates the expression
+
+* Can alternatively use `rlang::eval_tidy()` & `rlang::parse_expr()`
 
 
 ```{r, eval = FALSE}
 my_filter_function <- function(filter_condition){
   gtsummary::trial %>% 
-    dplyr::filter(rlang::eval_bare(rlang::parse_expr(filter_condition)))
+    dplyr::filter(eval(parse(text = filter_condition)))
 }
 
 my_filter_function(filter_condition = "age > 65")
@@ -285,6 +312,9 @@ my_mutate_function(mutate_var = "age")
 * Cue, the walrus operator `:=`
 
 * Part of the `rlang` package
+
+* `{glue}` syntax is automatically recognized on the left-hand side of the  
+walrus operator
 
 ```{r, eval=FALSE}
 my_naming_function <- function(variable){

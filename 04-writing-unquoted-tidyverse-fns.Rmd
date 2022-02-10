@@ -102,20 +102,6 @@ my_mean(mtcars, cyl, am)
 #> 1                                   6.59
 ```
 
-## Using the names of arguments in the output
-
-* Use `{glue}` syntax in conjunction with `:=` (the walrus operator)
-
-```{r, eval = FALSE}
-my_summarise4 <- function(data, expr) {
-  data %>% summarise(
-    "mean_{{expr}}" := mean({{ expr }}),
-    "sum_{{expr}}" := sum({{ expr }}),
-    "n_{{expr}}" := n()
-  )
-}
-```
-
 ---
 
 # Conclusion
@@ -124,6 +110,8 @@ my_summarise4 <- function(data, expr) {
   
 2. When writing functions using the `{tidyverse}`, need to account for the back-end
 design of the `{tidyverse}`, namely data masking
+
+3. This is tricky! (and not super consistent)
 
 ---
 

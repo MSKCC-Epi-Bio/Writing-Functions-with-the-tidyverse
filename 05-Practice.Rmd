@@ -7,35 +7,6 @@ class: inverse, center, middle
 # Let's Practice
 
 ---
-# Let's Practice
-
-Write a function that accepts a data frame, an unquoted variable name as arguments, and returns the column's mean.
-
-- Use `{{ }}` to capture the input
-
-```{r, eval = FALSE}
-my_mean(data, variable) {
-  data %>% dplyr::pull() %>% mean()
-}
-```
-
-- Convert unquoted variable name to a string and implement using `.data` + `dplyr:summarize()`
-
-```{r, eval = FALSE}
-my_mean(data, variable) {
-  variable_chr <- ()
-}
-```
-
-- Convert unquoted variable name to a string and implement directly in `mean()`
-
-```{r, eval = FALSE}
-my_mean(data, variable) {
-  variable_chr <- ()
-}
-```
-
----
 
 # Practice with {ggplot}
 
@@ -59,6 +30,10 @@ head(gtsummary::trial)
 # 6 Drug B    39  0.613 T4    I            0     1    15.6
 ```
 
+---
+# Step 1
+
+Write ggplot code that works and is close to what we want
 
 ---
 
@@ -83,6 +58,12 @@ gtsummary::trial %>%
 
 Put the working code into a function (haven't yet used function arguments)
 
+---
+
+# Step 2
+
+Put the working code into a function (haven't yet used function arguments)
+
 ```{r, eval=FALSE}
 plot_age_marker <- function(filter_condition, color_variable){
   gtsummary::trial %>% 
@@ -93,6 +74,12 @@ plot_age_marker <- function(filter_condition, color_variable){
     geom_point()
 }
 ```
+
+---
+
+# Step 3
+
+Replace the value of stage with the color_variable function input
 
 ---
 
@@ -127,12 +114,13 @@ plot_age_marker(filter_condition = "age > 40",
 
 Now, what if we want to subset the data based on a categorical variable?
 
-* need to make this work.
-
 ```{r, eval = FALSE}
-# try to run our function with an input that requires quotation marks
-plot_age_marker(filter_condition = "trt == "Drug A"",
+plot_age_marker(filter_condition = 'trt == "Drug A"',
                 color_variable = "stage")
 ```
 
+```{r, fig.height=3}
+plot_age_marker(filter_condition = "trt == \"Drug A\"",
+                color_variable = "stage")
+```
 
