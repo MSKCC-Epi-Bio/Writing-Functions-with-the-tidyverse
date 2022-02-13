@@ -37,11 +37,6 @@ my_mean(mtcars, cyl, am)
 - This is why we need injection, we need to modify that piece of code by injecting the code supplied to the function in place of var1 and var2.
 
 ---
-
- First, easy option is to just immediately convert unquoted variable names to strings
-`varname <- dplyr::select(data, {{ varname }}) |> names()`
-
----
 # How to use `{{ · }}`?
 
 * To inject a function argument in data-masked context, just embrace it with `{{ · }}`
