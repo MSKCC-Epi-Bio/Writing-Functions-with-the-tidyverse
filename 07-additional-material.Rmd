@@ -51,3 +51,28 @@ rlang::expr(mtcars %>%
 # mtcars %>% dplyr::select(mpg, hp)
 ```
 
+---
+
+# rlang: unquoted expresssions
+
+* You can also write functions that accept unquoted expressions as arguments
+
+```r
+my_filter <- function(data, condition) {
+  condition <- rlang::enquo(condition)
+  
+  dplyr::filter(data, !!condition)
+}
+
+my_filter(gtsummary::trial, age < 30) |> head()
+#> # A tibble: 6 x 8
+#>   trt      age marker stage grade response death ttdeath
+#>   <chr>  <dbl>  <dbl> <fct> <fct>    <int> <int>   <dbl>
+#> 1 Drug A    23  0.16  T1    II           0     0    24  
+#> 2 Drug B     9  1.11  T2    I            1     0    24  
+#> 3 Drug B    21  0.258 T4    I            0     1    12.9
+#> 4 Drug B    28  0.803 T4    II           0     1    18  
+#> 5 Drug B    25  2.45  T1    I            1     0    24  
+#> 6 Drug B    25  0.531 T4    III          0     1    23.2
+
+```

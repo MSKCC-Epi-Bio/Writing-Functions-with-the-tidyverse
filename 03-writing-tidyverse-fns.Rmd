@@ -33,7 +33,7 @@ preference
 * The type of argument required by the function (quoted or unquoted)
 should be specified in the help file when writing functions more formally
 
-* Note: `tbl_summary()` is unique in that it takes both quoted and unquoted 
+* `tbl_summary()` is unique in that it takes both quoted and unquoted 
 arguments. This is more work for the developer and isn't necessarily recommended.
 
 ---
@@ -239,13 +239,13 @@ Why did we get this note? *The character condition needs to be an expression*
 
 * `eval()`: Evaluates the expression
 
-* Can alternatively use `rlang::eval_tidy()` & `rlang::parse_expr()`
+* Can alternatively use `!!` injector & `rlang::parse_expr()`
 
 
 ```{r, eval = FALSE}
 my_filter_function <- function(filter_condition){
   gtsummary::trial %>% 
-    dplyr::filter(eval(parse(text = filter_condition)))
+    dplyr::filter(!!rlang::parse_expr(filter_condition))
 }
 
 my_filter_function(filter_condition = "age > 65")

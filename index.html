@@ -323,7 +323,7 @@ preference
 * The type of argument required by the function (quoted or unquoted)
 should be specified in the help file when writing functions more formally
 
-* Note: `tbl_summary()` is unique in that it takes both quoted and unquoted 
+* `tbl_summary()` is unique in that it takes both quoted and unquoted 
 arguments. This is more work for the developer and isn't necessarily recommended.
 
 ---
@@ -536,14 +536,14 @@ Why did we get this note? *The character condition needs to be an expression*
 
 * `eval()`: Evaluates the expression
 
-* Can alternatively use `rlang::eval_tidy()` &amp; `rlang::parse_expr()`
+* Can alternatively use `!!` injector &amp; `rlang::parse_expr()`
 
 
 
 ```r
 my_filter_function &lt;- function(filter_condition){
   gtsummary::trial %&gt;% 
-    dplyr::filter(eval(parse(text = filter_condition)))
+    dplyr::filter(!!rlang::parse_expr(filter_condition))
 }
 
 my_filter_function(filter_condition = "age &gt; 65")
@@ -718,11 +718,6 @@ my_mean(mtcars, cyl, am)
 - Instead we want it to see mean(cyl + am). 
 
 - This is why we need injection, we need to modify that piece of code by injecting the code supplied to the function in place of var1 and var2.
-
----
-
- First, easy option is to just immediately convert unquoted variable names to strings
-`varname &lt;- dplyr::select(data, {{ varname }}) |&gt; names()`
 
 ---
 # How to use `{{ · }}`?
@@ -1028,6 +1023,31 @@ rlang::expr(mtcars %&gt;%
 # mtcars %&gt;% dplyr::select(mpg, hp)
 ```
 
+---
+
+# rlang: unquoted expresssions
+
+* You can also write functions that accept unquoted expressions as arguments
+
+```r
+my_filter &lt;- function(data, condition) {
+  condition &lt;- rlang::enquo(condition)
+  
+  dplyr::filter(data, !!condition)
+}
+
+my_filter(gtsummary::trial, age &lt; 30) |&gt; head()
+#&gt; # A tibble: 6 x 8
+#&gt;   trt      age marker stage grade response death ttdeath
+#&gt;   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;fct&gt; &lt;fct&gt;    &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;
+#&gt; 1 Drug A    23  0.16  T1    II           0     0    24  
+#&gt; 2 Drug B     9  1.11  T2    I            1     0    24  
+#&gt; 3 Drug B    21  0.258 T4    I            0     1    12.9
+#&gt; 4 Drug B    28  0.803 T4    II           0     1    18  
+#&gt; 5 Drug B    25  2.45  T1    I            1     0    24  
+#&gt; 6 Drug B    25  0.531 T4    III          0     1    23.2
+
+```
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
