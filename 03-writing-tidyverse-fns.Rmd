@@ -25,6 +25,8 @@ tbl_summary(trial, include = c("trt", "age"))
 tbl_summary(trial, include = c(trt, age))
 ```
 
+# Two Options for Writing tidyverse-style Functions
+
 * Requiring quoted or unquoted function arguments is a matter of developer 
 preference
 
@@ -234,13 +236,12 @@ Why did we get this note? *The character condition needs to be an expression*
 
 # Functions for Passing Strings to filter()
 
-* `parse()`: transforms text into an un-evaluated expression 
-(i.e., it removes the quotation marks)
+* Can use `!!` injector & `rlang::parse_expr()`
 
-* `eval()`: Evaluates the expression
+* `rlang::parse_expr`: transforms text into an un-evaluated expression 
+(i.e., it removes the quotation marks but doesn't evaluate the text)
 
-* Can alternatively use `!!` injector & `rlang::parse_expr()`
-
+* `!!` to be covered in next section
 
 ```{r, eval = FALSE}
 my_filter_function <- function(filter_condition){

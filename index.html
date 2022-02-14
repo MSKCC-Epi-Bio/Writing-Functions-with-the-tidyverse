@@ -315,6 +315,8 @@ tbl_summary(trial, include = c("trt", "age"))
 tbl_summary(trial, include = c(trt, age))
 ```
 
+# Two Options for Writing tidyverse-style Functions
+
 * Requiring quoted or unquoted function arguments is a matter of developer 
 preference
 
@@ -531,13 +533,12 @@ Why did we get this note? *The character condition needs to be an expression*
 
 # Functions for Passing Strings to filter()
 
-* `parse()`: transforms text into an un-evaluated expression 
-(i.e., it removes the quotation marks)
+* Can use `!!` injector &amp; `rlang::parse_expr()`
 
-* `eval()`: Evaluates the expression
+* `rlang::parse_expr`: transforms text into an un-evaluated expression 
+(i.e., it removes the quotation marks but doesn't evaluate the text)
 
-* Can alternatively use `!!` injector &amp; `rlang::parse_expr()`
-
+* `!!` to be covered in next section
 
 
 ```r
@@ -900,6 +901,32 @@ plot_age_marker(filter_condition = "trt == \"Drug A\"",
 
 ![](index_files/figure-html/unnamed-chunk-37-1.png)&lt;!-- --&gt;
 
+---
+
+# Step 4
+
+Re-write the function using bare (unquoted) arguments
+
+---
+# Step 4
+
+Re-write the function using bare (unquoted) arguments
+
+
+```r
+plot_age_marker_bare &lt;- function(filter_condition, color_variable){
+  gtsummary::trial %&gt;% 
+    dplyr::filter({{filter_condition}}) %&gt;% 
+    ggplot(aes(x = age,
+             y = marker, 
+             color = {{color_variable}})) +
+    geom_point()
+}
+
+plot_age_marker_bare(filter_condition = age &gt; 40, color_variable = stage)
+```
+
+![](index_files/figure-html/unnamed-chunk-38-1.png)&lt;!-- --&gt;
 
 ---
 

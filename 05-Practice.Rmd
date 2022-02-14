@@ -124,3 +124,27 @@ plot_age_marker(filter_condition = "trt == \"Drug A\"",
                 color_variable = "stage")
 ```
 
+---
+
+# Step 4
+
+Re-write the function using bare (unquoted) arguments
+
+---
+
+# Step 4
+
+Re-write the function using bare (unquoted) arguments
+
+```{r, fig.height=3}
+plot_age_marker_bare <- function(filter_condition, color_variable){
+  gtsummary::trial %>% 
+    dplyr::filter({{filter_condition}}) %>% 
+    ggplot(aes(x = age,
+             y = marker, 
+             color = {{color_variable}})) +
+    geom_point()
+}
+
+plot_age_marker_bare(filter_condition = age > 40, color_variable = stage)
+```
