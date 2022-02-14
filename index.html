@@ -632,47 +632,6 @@ my_naming_function(variable = "age")
 ```
 
 ---
-# Functions for Passing Strings to dplyr verbs
-
-* `across()`: if you want the user to provide a set of data-variables that are
-then transformed
-
-* See `vignette("colwise")`
-
-
-```r
-summarise_mean &lt;- function(data, vars) {
-  data %&gt;% 
-    summarise(n = n(), 
-              across({{ vars }}, mean))
-}
-
-mtcars %&gt;% 
-  group_by(cyl) %&gt;% 
-  summarise_mean(where(is.numeric))
-```
-
-
-```r
-my_summarise &lt;- function(data, group_var, summarise_var) {
-  data %&gt;%
-    group_by(across({{ group_var }})) %&gt;% 
-    summarise(across({{ summarise_var }}, mean))
-}
-```
-
-* Use the `.names` argument to `across()` to control the names of the output.
-
-
-```r
-my_summarise &lt;- function(data, group_var, summarise_var) {
-  data %&gt;%
-    group_by(across({{ group_var }})) %&gt;% 
-    summarise(across({{ summarise_var }}, mean, .names = "mean_{.col}"))
-}
-```
-
----
 
 class: inverse, center, middle
 
@@ -858,7 +817,7 @@ gtsummary::trial %&gt;%
   geom_point()
 ```
 
-![](index_files/figure-html/unnamed-chunk-35-1.png)&lt;!-- --&gt;
+![](index_files/figure-html/unnamed-chunk-32-1.png)&lt;!-- --&gt;
 
 ---
 
@@ -919,7 +878,7 @@ plot_age_marker(filter_condition = "age &gt; 40",
                 color_variable = "stage")
 ```
 
-![](index_files/figure-html/unnamed-chunk-38-1.png)&lt;!-- --&gt;
+![](index_files/figure-html/unnamed-chunk-35-1.png)&lt;!-- --&gt;
 
 ---
 
@@ -939,7 +898,7 @@ plot_age_marker(filter_condition = "trt == \"Drug A\"",
                 color_variable = "stage")
 ```
 
-![](index_files/figure-html/unnamed-chunk-40-1.png)&lt;!-- --&gt;
+![](index_files/figure-html/unnamed-chunk-37-1.png)&lt;!-- --&gt;
 
 
 ---
