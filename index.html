@@ -91,11 +91,7 @@ Be able to write a function that utilizes `{tidyverse}` functions (e.g.,
   
 * 12:40-1pm: Practice!
 
-* Additional Material (if time)
-
-  - Writing functions that use both `{tidyverse}` functions &amp; base R functions
-
-  - `rlang::sym()` and `rlang::syms()`, e.g. `select(!!rlang::sym(varname))`
+* Additional Material (for reference)
 
 ---
 
@@ -178,6 +174,17 @@ function and arguments
 
 3. Adapt code to replace variable names and/or values with function arguments,
 as needed
+
+
+---
+
+
+
+
+
+
+class: inverse, center, middle
+# Writing tidyverse-style Functions
 
 ---
 
@@ -282,18 +289,6 @@ mtcars$mpg
 without specifying the `env-variable` they arise from. Allows for shorthand in
 code, but introduces problems when writing functions.
 
-
-
----
-
-
-
-
-
-
-class: inverse, center, middle
-# Writing tidyverse-style Functions
-
 ---
 
 # Two Options for Writing tidyverse-style Functions
@@ -314,6 +309,8 @@ tbl_summary(trial, include = c("trt", "age"))
 # calling tbl_summary using unquoted arguments (not all functions accept quoted + unquoted input)
 tbl_summary(trial, include = c(trt, age))
 ```
+
+---
 
 # Two Options for Writing tidyverse-style Functions
 
@@ -908,6 +905,7 @@ plot_age_marker(filter_condition = "trt == \"Drug A\"",
 Re-write the function using bare (unquoted) arguments
 
 ---
+
 # Step 4
 
 Re-write the function using bare (unquoted) arguments
