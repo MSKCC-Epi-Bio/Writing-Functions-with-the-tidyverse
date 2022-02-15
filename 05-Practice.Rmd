@@ -90,7 +90,7 @@ Replace the value of stage with the color_variable function input
 ```{r}
 plot_age_marker <- function(filter_condition, color_variable){
   gtsummary::trial %>% 
-    dplyr::filter(rlang::eval_bare(rlang::parse_expr(filter_condition))) %>% 
+    dplyr::filter(!!rlang::parse_expr(filter_condition)) %>% 
     ggplot(aes(x = age,
              y = marker, 
              color = .data[[color_variable]])) +

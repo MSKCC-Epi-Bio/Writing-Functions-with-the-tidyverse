@@ -697,6 +697,8 @@ my_mean(mtcars, cyl, am)
 
 * Use the `!!` and `rlang::enquo(·)` combination when you need to pass `var1` and `var2` around before it's injected.
 
+* `!!` is a part of `{rlang}`
+
 
 ```r
 my_mean &lt;- function(data, var1, var2) {
@@ -853,7 +855,7 @@ Replace the value of stage with the color_variable function input
 ```r
 plot_age_marker &lt;- function(filter_condition, color_variable){
   gtsummary::trial %&gt;% 
-    dplyr::filter(rlang::eval_bare(rlang::parse_expr(filter_condition))) %&gt;% 
+    dplyr::filter(!!rlang::parse_expr(filter_condition)) %&gt;% 
     ggplot(aes(x = age,
              y = marker, 
              color = .data[[color_variable]])) +

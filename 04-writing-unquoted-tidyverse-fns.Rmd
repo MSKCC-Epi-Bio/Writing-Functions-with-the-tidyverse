@@ -60,6 +60,8 @@ my_mean(mtcars, cyl, am)
 
 * Use the `!!` and `rlang::enquo(·)` combination when you need to pass `var1` and `var2` around before it's injected.
 
+* `!!` is a part of `{rlang}`
+
 ```{r, eval = FALSE}
 my_mean <- function(data, var1, var2) {
   var1_quo <- rlang::enquo(var1)
