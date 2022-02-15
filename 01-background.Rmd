@@ -43,10 +43,6 @@ Be able to write a function that utilizes `{tidyverse}` functions (e.g.,
 * Writing functions that use **unquoted** arguments in a function call
 
     -  curly-curly (`{{ }}`)
-
----
-
-# Outline
   
 * 12:40-1pm: Practice!
 

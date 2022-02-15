@@ -84,10 +84,6 @@ Be able to write a function that utilizes `{tidyverse}` functions (e.g.,
 * Writing functions that use **unquoted** arguments in a function call
 
     -  curly-curly (`{{ }}`)
-
----
-
-# Outline
   
 * 12:40-1pm: Practice!
 
@@ -310,6 +306,9 @@ tbl_summary(trial, include = c("trt", "age"))
 tbl_summary(trial, include = c(trt, age))
 ```
 
+* `tbl_summary()` is unique in that it takes both quoted and unquoted 
+arguments. This is more work for the developer and isn't necessarily recommended.
+
 ---
 
 # Two Options for Writing tidyverse-style Functions
@@ -321,9 +320,6 @@ preference
 
 * The type of argument required by the function (quoted or unquoted)
 should be specified in the help file when writing functions more formally
-
-* `tbl_summary()` is unique in that it takes both quoted and unquoted 
-arguments. This is more work for the developer and isn't necessarily recommended.
 
 ---
 
