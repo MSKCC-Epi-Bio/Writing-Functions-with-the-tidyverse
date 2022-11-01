@@ -4,9 +4,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-
----
-
 # Conclusion
 
 1. Don't copy/paste your code >2x, write a function! 
@@ -15,9 +12,3 @@ editor_options:
 design of the `{tidyverse}`, namely data-masking and tidy-select
 
 3. This is tricky! (and not super consistent, though recent updates to {tidyselect} make it easier to distinguish data-masking from tidy-select evaluation)
-
----
-
-class: inverse, center, middle
-
-# Questions?
