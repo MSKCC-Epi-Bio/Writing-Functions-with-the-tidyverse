@@ -30,23 +30,19 @@ Be able to write a function that utilizes `{tidyverse}` functions (e.g.,
 
 * Function Basics
 
-* Writing functions that use **quoted** arguments in a function call
+* Nuances of writing functions with the tidyverse
 
-    - Passing strings to `dplyr` verbs
+  - data-masking
   
-    - `.data[[varname]]`
+  - tidy-select
 
-    - `any_of()`, `all_of()` and `across()`
+* Writing functions that use data-masking tidyverse functions
 
-    - Naming variables using the walrus operator (`:=`)
+* Writing functions that use tidy-select tidyverse functions
 
-* Writing functions that use **unquoted** arguments in a function call
+* Practice
 
-    -  curly-curly (`{{ }}`)
-  
-* 12:40-1pm: Practice!
-
-* Additional Material (for reference)
+* Resources & Additional Material
 
 ---
 

@@ -9,6 +9,89 @@ class: inverse, center, middle
 # Additional Material
 
 ---
+# Two options for writing tidyverse-style functions
+
+* Requiring quoted or unquoted function arguments is a matter of developer 
+preference
+
+* May be slightly easier for the user to supply unquoted arguments (less typing)
+
+* The type of argument required by the function (quoted or unquoted)
+should be specified in the help file when writing functions more formally
+
+---
+
+# Alternatives to `{{ · }}`?
+
+* `{{ · }}` is a shortcut for `!!enquo(·)`
+
+* Use the `!!` and `rlang::enquo(·)` combination when you need to pass `var1` and `var2` around before it's injected.
+
+* `!!` is a part of `{rlang}`
+
+```{r, eval = FALSE}
+my_mean <- function(data, var1, var2) {
+  var1_quo <- rlang::enquo(var1)
+  var2_quo <- rlang::enquo(var2)
+  
+  dplyr::summarise(data, mean(!!var1_quo + !!var2_quo))
+}
+
+my_mean(mtcars, cyl, am)
+#> # A tibble: 1 x 1
+#>   `mean(cyl + am)`
+#>              <dbl>
+#> 1             6.59
+```
+
+---
+# Can I avoid `{{ · }}` and `!!enquo(·)`?
+
+* YES! (mostly)
+
+* Immediately convert inputs into column name **strings**, and utilize all the what you learned in the first portion of this presentation.
+
+```{r, eval = FALSE}
+my_mean <- function(data, var1, var2) {
+  var1 <- dplyr::select(data, {{ var1 }}) |> names()
+  var2 <- dplyr::select(data, {{ var2 }}) |> names()
+  
+  dplyr::summarise(data, mean(.data[[var1]] + .data[[var2]]))
+}
+
+my_mean(mtcars, cyl, am)
+#> # A tibble: 1 x 1
+#>   `mean(.data[["cyl"]] + .data[["am"]])`
+#>                                    <dbl>
+#> 1                                   6.59
+```
+
+---
+
+# Naming new variables created within your function
+
+* Cue, the walrus operator `:=`
+
+* Part of the `rlang` package
+
+* `{glue}` syntax is automatically recognized on the left-hand side of the  
+walrus operator
+
+```{r, eval=FALSE}
+my_naming_function <- function(variable){
+  gtsummary::trial %>% 
+    dplyr::mutate("mean_{variable}" := mean(.data[[variable]], na.rm = TRUE))
+}
+
+my_naming_function(variable = "age")
+# A tibble: 200 x 9
+#  trt      age marker stage grade response death ttdeath mean_age
+#  <chr>  <dbl>  <dbl> <fct> <fct>    <int> <int>   <dbl>    <dbl>
+# 1 Drug A    23  0.16  T1    II           0     0    24       47.2
+# 2 Drug B     9  1.11  T2    I            1     0    24       47.2
+```
+
+---
 
 # rlang
 

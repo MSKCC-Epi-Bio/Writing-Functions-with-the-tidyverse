@@ -8,6 +8,8 @@
 
 * [What is data-masking and why do I need {{?](https://rlang.r-lib.org/reference/topic-data-mask.html)
 
+* [{tidyselect} 1.2.0 Release Notes](https://github.com/r-lib/tidyselect/blob/main/NEWS.md#tidyselect-120)
+
 * [Using ggplot2 in packages](https://ggplot2.tidyverse.org/articles/ggplot2-in-packages.html)
 
 * [Functional Programming: Tidy Evaluation](https://dcl-prog.stanford.edu/tidy-eval-detailed.html)

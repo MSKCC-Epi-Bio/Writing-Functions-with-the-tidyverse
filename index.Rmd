@@ -1,7 +1,7 @@
 ---
 title: "Writing Functions with the {tidyverse}"
 author: "Jessica A. Lavery & Daniel D. Sjoberg"
-date: "February 15, 2022"
+date: "Last Updated: October 28, 2022; Originally presented February 15, 2022"
 output:
   xaringan::moon_reader:
     css: [xaringan-themer.css, custom.css]
@@ -42,7 +42,9 @@ class: inverse, center, title-slide, middle
 
 ### Jessica A. Lavery & Daniel D. Sjoberg
 
-#### February 15, 2022
+#### Last Updated: October 28, 2022
+
+#### Originally Presented: February 15, 2022
 
 
 <p align="center"><img src="Images/White-Transparent.png" width=30%></p>
