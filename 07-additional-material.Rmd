@@ -9,17 +9,6 @@ class: inverse, center, middle
 # Additional Material
 
 ---
-# Two options for writing tidyverse-style functions
-
-* Requiring quoted or unquoted function arguments is a matter of developer 
-preference
-
-* May be slightly easier for the user to supply unquoted arguments (less typing)
-
-* The type of argument required by the function (quoted or unquoted)
-should be specified in the help file when writing functions more formally
-
----
 
 # Alternatives to `{{ · }}`?
 
