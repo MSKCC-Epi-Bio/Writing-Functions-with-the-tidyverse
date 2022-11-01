@@ -1,6 +1,0 @@
-class: inverse, center, middle
-# Using tidyverse-style Functions
-
----
-
-*What did we want to put here?*

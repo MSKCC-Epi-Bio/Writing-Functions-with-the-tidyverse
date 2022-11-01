@@ -207,13 +207,11 @@
     },
     "cli": {
       "Package": "cli",
-      "Version": "3.1.1",
+      "Version": "3.4.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "da5160e769a652e3ec7111d63883f9bc",
-      "Requirements": [
-        "glue"
-      ]
+      "Hash": "0d297d01734d2bcea40197bd4971a764",
+      "Requirements": []
     },
     "clipr": {
       "Package": "clipr",
@@ -775,11 +773,12 @@
     },
     "lifecycle": {
       "Package": "lifecycle",
-      "Version": "1.0.1",
+      "Version": "1.0.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "a6b6d352e3ed897373ab19d8395c98d0",
+      "Hash": "001cecbeac1cff9301bdc3775ee46a86",
       "Requirements": [
+        "cli",
         "glue",
         "rlang"
       ]
@@ -844,8 +843,9 @@
       "Version": "0.3.1",
       "Source": "Repository",
       "Repository": "RSPM",
+      "RemoteType": "repository",
       "RemoteSha": "a96301edacf85a641ef7ece2d973b54267547a2c",
-      "Hash": "4a1f7ea8cbb358b53a46a37cf5263a07",
+      "Hash": "aff467a83bc2f1dc74c103774ee773d1",
       "Requirements": [
         "ggplot2",
         "glue",
@@ -1062,10 +1062,10 @@
     },
     "rlang": {
       "Package": "rlang",
-      "Version": "0.4.12",
+      "Version": "1.0.6",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "0879f5388fe6e4d56d7ef0b7ccb031e5",
+      "Hash": "4ed1f8336c8d52c3e750adcdc57228a7",
       "Requirements": []
     },
     "rmarkdown": {
@@ -1231,16 +1231,17 @@
     },
     "tidyselect": {
       "Package": "tidyselect",
-      "Version": "1.1.1",
+      "Version": "1.2.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "7243004a708d06d4716717fa1ff5b2fe",
+      "Hash": "79540e5fcd9e0435af547d885f184fd5",
       "Requirements": [
-        "ellipsis",
+        "cli",
         "glue",
-        "purrr",
+        "lifecycle",
         "rlang",
-        "vctrs"
+        "vctrs",
+        "withr"
       ]
     },
     "tidyverse": {
@@ -1319,12 +1320,12 @@
     },
     "vctrs": {
       "Package": "vctrs",
-      "Version": "0.3.8",
+      "Version": "0.4.2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "ecf749a1b39ea72bd9b51b76292261f1",
+      "Hash": "0e3dfc070b2a8f0478fcdf86fb33355d",
       "Requirements": [
-        "ellipsis",
+        "cli",
         "glue",
         "rlang"
       ]

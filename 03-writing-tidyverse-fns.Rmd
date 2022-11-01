@@ -4,7 +4,7 @@ editor_options:
   chunk_output_type: console
 ---
 class: inverse, center, middle
-# Writing tidyverse-style Functions
+# Writing tidyverse-style functions
 
 ---
 
@@ -33,11 +33,46 @@ test_function <- function(select_var){
 test_function(select_var = trt)
 ```
 
-* Why does this error occur? Because the `{tidyverse}` utilizes *data masking*
+* Why does this error occur? Because the `{tidyverse}` utilizes *tidy evaluation*
 
 ---
 
-# What is data-masking?
+# What is tidy evaluation?
+
+**Tidy evaluation:** A framework for controlling how expressions and variables
+in your code are evaluated by tidyverse functions.
+
+* Allows programmers to select variables based on their position, name, or type
+
+* Useful for passing variable names as inputs to functions
+that use tidyverse packages like `dplyr` and `ggplot2`
+
+* {dplyr} verbs rely on tidy evaluation to resolve programming commands
+
+---
+
+# Tidy evaluation
+
+* Two types of tidy evaluation:
+  
+  - **Data-masking**, used by: `arrange()`, `count()`, `filter()`, `group_by()`, `mutate()`, and `summarise()`
+  
+  - **Tidy-select**, used by: `across()`, `relocate()`, `rename()`, `select()`, and `pull()`
+  
+* To determine which type of tidy evaluation a function uses, look at the help file
+
+<!-- <p align="center"><img src="Images/filter_help_file.png" height=10%></p> -->
+
+
+
+---
+
+class: inverse, center, middle
+# data-masking
+
+---
+
+# Data-masking
 
 .pull-left[
 * Data-masking is a distinctive feature of R whereby programming is performed directly on a data set, with columns defined as normal objects.
@@ -67,21 +102,10 @@ mtcars %>%
 ```
 
 ---
-# How to tell whether a function uses data masking?
 
-In a function's help file, the arguments list will specify whether the function 
-uses data masking.
+# Writing functions using {dplyr} verbs that use data-masking
 
-<p align="center"><img src="Images/filter_help_file.png" width=50%></p>
-
----
-
-# Data- and Env- Variables
-
-* Data masking introduces ambiguity with respect to what you mean by "variable"
-
-* This ambiguity is clarified by indicating to R where to look for an object
-(within a data frame or within the environment)
+* Data masking introduces ambiguity with respect to what you mean by "variable". 
 
 * **env-variables**: objects (variables) that live in the environment; 
 usually created with `<-`
@@ -106,156 +130,22 @@ code, but introduces problems when writing functions.
 
 ---
 
-# Two Options for Writing tidyverse-style Functions
+# Writing functions using {dplyr} verbs that use data-masking
 
-* Option 1: Write a function that uses **quoted** arguments in the function call
+* {dplyr} verbs that use data masking:
 
-```{r, eval = FALSE}
-# calling tbl_summary using quoted arguments
-tbl_summary(trial, include = c("trt", "age"))
-```
-
-* Option 2: Write a function that uses **unquoted** arguments in the function call 
-(also known as *bare arguments*)
-
-```{r, eval = FALSE}
-# calling tbl_summary using unquoted arguments (not all functions accept quoted + unquoted input)
-tbl_summary(trial, include = c(trt, age))
-```
-
-* `tbl_summary()` is unique in that it takes both quoted and unquoted 
-arguments. This is more work for the developer and isn't necessarily recommended.
+  - `arrange()`, `count()`, `filter()`, `group_by()`, `mutate()`, and `summarise()`
+  
+*  Data masking introduces ambiguity with respect to what you mean by "variable". 
+  
+*  Ambiguity is clarified by indicating to R where to look for an object (within a data frame or within the environment) via `.data$varname`, `.data[[group_var]]`, `.env$global_var_name`
 
 ---
 
-# Two Options for Writing tidyverse-style Functions
-
-* Requiring quoted or unquoted function arguments is a matter of developer 
-preference
-
-* May be slightly easier for the user to supply unquoted arguments (less typing)
-
-* The type of argument required by the function (quoted or unquoted)
-should be specified in the help file when writing functions more formally
-
----
-
-# Tidy evaluation
-
-**Tidy evaluation:** A framework for controlling how expressions and variables
-in your code are evaluated by tidyverse functions.
-
-* Useful for passing variable names as inputs to functions
-that use tidyverse packages like `dplyr` and `ggplot2`
-
----
-
-class: inverse, center, middle
-# Option 1: Writing functions that use quoted arguments in a function call
-
----
-
-# Passing Strings to dplyr verbs
-
-* This means that you want to use any of the `dplyr` verbs in your function,
-and want to pass a string (i.e., the user is supplying a quoted argument)
-
-`dplyr` verbs: 
-
-* `select()`: picks variables based on their names
-
-* `group_by()`: converts an existing table to a grouped table, where operations
-are performed by group
-
-* `filter()`: picks cases based on their values
-
-* `mutate()`: adds new variables based on existing variables
-
----
-
-# Passing Strings to select() 
+# Passing quoted arguments to group_by()
 
 A first attempt:
-
-```{r, eval = FALSE}
-# using a function to select a single variable
-my_select_function <- function(select_variable){
-  gtsummary::trial %>% 
-    dplyr::select(select_variable)
-}
-
-my_select_function(select_variable = "trt")
-# this works, but we get a note
-# Note: Using an external vector in selections is ambiguous.
-# i Use `all_of(select_variable)` instead of `select_variable` to silence this message.
-# i See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
-```
-
-Why did we get this note? *Within the function, it's not clear if the* 
-*select variable is a .data or an .env variable*
-
----
-
-# Passing Strings to select()
-
-One solution is to clarify that we are indicating that the variable to 
-select is a `.data` variable
-
-We can do that by using `.data[[ · ]]` (`.data` $\ne$ data frame, but is a 
-way of telling R to look for a data variable)
-
-```{r, eval=FALSE}
-my_select_function <- function(select_variable){
-  gtsummary::trial %>% 
-    dplyr::select(.data[[select_variable]])
-}
-
-my_select_function(select_variable = "trt")
-# A tibble: 200 x 1
-#   trt   
-#   <chr> 
-# 1 Drug A
-# 2 Drug B
-# etc.
-```
-
----
-
-# Functions for Passing Strings to select()
-
-* If we want to select multiple variables, can utilize the following functions
-
-* `any_of()` and `all_of()` are helper functions to select variables from 
-a character vector
-
-* `any_of()`: selecting any of the listed variables
-
-* `all_of()`: for strict selection. If any of the variables in the character vector is missing, an error is thrown
-
-* Can also use `!all_of()` to select all variables not found in the character vector supplied to `all_of()`
-
-```{r, eval = FALSE}
-# using a function to select multiple variables
-my_select_function <- function(select_variable){
-  gtsummary::trial %>% 
-    dplyr::select(dplyr::all_of(select_variable))
-}
-
-my_select_function(select_variable = c("trt", "age"))
-# A tibble: 200 x 2
-#   trt      age
-#   <chr>  <dbl>
-# 1 Drug A    23
-# 2 Drug B     9
-# etc.
-```
-
----
-
-# Passing Strings to group_by()
-
-A first attempt:
-
+  
 ```{r, eval=FALSE}
 my_group_function <- function(group_vars){
   gtsummary::trial %>% 
@@ -269,9 +159,9 @@ my_group_function(group_vars = "trt")
 ```
 
 ---
-
-# Passing Strings to group_by()
-
+  
+# Passing quoted arguments to group_by()
+  
 * Passing a single variable to group by
 
 ```{r, eval=FALSE}
@@ -288,10 +178,11 @@ my_group_function(group_var = "trt")
 # 1 Drug A    23  0.16  T1    II           0     0    24  
 # 2 Drug B     9  1.11  T2    I            1     0    24 
 ```
+
 ---
-
-# Passing Strings to group_by()
-
+  
+# Passing quoted arguments to group_by()
+  
 * Passing multiple variables to group by 
 
 * `across()`: allows you to use `select()` semantics inside data-masking
@@ -311,12 +202,13 @@ my_group_function(group_vars = c("trt", "stage"))
 # 1 Drug A    23  0.16  T1    II           0     0    24  
 # 2 Drug B     9  1.11  T2    I            1     0    24  
 ```
+
 ---
-
-# Passing Strings to filter()
-
-A first attempt:
-
+  
+# Passing quoted arguments to filter()
+  
+  A first attempt:
+  
 ```{r, eval = FALSE}
 # using a function to select a single variable
 my_filter_function <- function(filter_condition){
@@ -331,11 +223,11 @@ my_filter_function(filter_condition = "age > 65")
 ```
 
 Why did we get this note? *The character condition needs to be an expression*
-
+  
 ---
-
-# Functions for Passing Strings to filter()
-
+  
+# Passing quoted arguments to filter()
+  
 * Can use `!!` injector & `rlang::parse_expr()`
 
 * `rlang::parse_expr`: transforms text into an un-evaluated expression 
@@ -362,7 +254,7 @@ my_filter_function(filter_condition = "age > 65")
 
 ---
 
-# Functions for Passing Strings to mutate()
+# Passing quoted arguments to mutate()
 
 A first attempt: 
 
@@ -389,7 +281,7 @@ my_mutate_function(mutate_var = "age")
 
 ---
 
-# Functions for Passing Strings to mutate()
+# Passing quoted arguments to mutate()
 
 ```{r, eval=FALSE}
 my_mutate_function <- function(mutate_var){
@@ -408,27 +300,198 @@ my_mutate_function(mutate_var = "age")
 
 ---
 
-# Naming new variables created within your function
+# Passing unquoted arguments to Data-Masking Functions
 
-* Cue, the walrus operator `:=`
+* Passing data-masked arguments to functions requires injection (also known as quasiquotation) with the embracing operator `{{ · }}` or, in more complex cases, the injection operator `!!`.
 
-* Part of the `rlang` package
+* This is needed because under the hood data-masking works by defusing R code to prevent its immediate evaluation.
 
-* `{glue}` syntax is automatically recognized on the left-hand side of the  
-walrus operator
+* The defused code is resumed later on in a context where data frame columns are defined.
 
-```{r, eval=FALSE}
-my_naming_function <- function(variable){
-  gtsummary::trial %>% 
-    dplyr::mutate("mean_{variable}" := mean(.data[[variable]], na.rm = TRUE))
+```{r, eval = FALSE}
+my_mean <- function(data, var1, var2) {
+  dplyr::summarise(data, mean(var1 + var2))
 }
 
-my_naming_function(variable = "age")
-# A tibble: 200 x 9
-#  trt      age marker stage grade response death ttdeath mean_age
-#  <chr>  <dbl>  <dbl> <fct> <fct>    <int> <int>   <dbl>    <dbl>
-# 1 Drug A    23  0.16  T1    II           0     0    24       47.2
-# 2 Drug B     9  1.11  T2    I            1     0    24       47.2
+my_mean(mtcars, cyl, am)
+#> Error in `dplyr::summarise()`:
+#> ! Problem while computing `..1 = mean(var1 + var2)`.
+#> Caused by error in `mean()`:
+#> ! object 'cyl' not found
+```
+
+???
+
+- The problem here is that `summarise()` defuses the R code it was supplied, i.e. mean(var1 + var2). 
+
+- Instead we want it to see mean(cyl + am). 
+
+- This is why we need injection, we need to modify that piece of code by injecting the code supplied to the function in place of var1 and var2.
+
+---
+# How to use `{{ · }}`?
+
+* To inject a function argument in data-masked context, just embrace it with `{{ · }}`
+
+```{r, eval = FALSE}
+my_mean <- function(data, var1, var2) {
+  dplyr::summarise(data, mean({{ var1 }} + {{ var2 }}))
+}
+
+my_mean(mtcars, cyl, am)
+#> # A tibble: 1 x 1
+#>   `mean(cyl + am)`
+#>              <dbl>
+#> 1             6.59
+```
+
+
+---
+
+class: inverse, center, middle
+
+# dplyr verbs that use tidy-select
+
+---
+
+# Writing functions using {dplyr} verbs that use tidy-select
+
+* Details of tidy-select available [online](https://tidyselect.r-lib.org/articles/syntax.html) for the curious programmer
+
+* Slides reflect {tidyselect} 1.2.0, released October 2022
+
+* To write functions using {dplyr} verbs that use tidy-select: In selecting functions, can put the variable name in quotes or use `all_of()`, `any_of()` helper functions to select variables
+
+---
+
+# Writing functions using {dplyr} verbs that use tidy-select
+
+* `any_of()`: selecting **any** of the listed variables
+
+* `all_of()`: for **strict** selection. If any of the variables in the character vector is missing, an error is thrown
+
+* Can also use `!all_of()` to select all variables not found in the character vector supplied to `all_of()`
+
+```{r, eval = FALSE}
+# using a function to select multiple variables
+my_select_function <- function(select_variable){
+  gtsummary::trial %>% 
+    dplyr::select(dplyr::all_of(select_variable))
+}
+
+my_select_function(select_variable = c("trt", "age"))
+# A tibble: 200 x 2
+#   trt      age
+#   <chr>  <dbl>
+# 1 Drug A    23
+# 2 Drug B     9
+# etc.
+```
+
+---
+
+# Passing quoted arguments to select() 
+
+First attempt:
+
+```{r, eval = FALSE}
+# using a function to select a single variable
+my_select_function <- function(select_variables){
+  gtsummary::trial %>% 
+    dplyr::select(select_variables)
+}
+
+my_select_function(select_variables = c("trt", "age"))
+# Warning message:
+# Using an external vector in selections was deprecated in tidyselect 1.1.0.
+# i Please use `all_of()` or `any_of()` instead.
+#   # Was:
+#   data %>% select(select_variables)
+# 
+#   # Now:
+#   data %>% select(all_of(select_variables))
+# 
+# See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
+```
+
+---
+
+# Passing quoted arguments to select() 
+
+* No messages or warnings returned after `all_of` is added to `select`
+
+```{r, eval = FALSE}
+# using a function to select a single variable
+my_select_function <- function(select_variables){
+  gtsummary::trial %>% 
+    dplyr::select(all_of(select_variables))
+}
+
+my_select_function(select_variables = c("trt", "age"))
+# # A tibble: 200 x 1
+#   trt
+#   <chr>
+# 1 Drug A
+# 2 Drug B
+# 3 Drug A
+# etc.
+```
+
+---
+
+# Passing unquoted arguments to dplyr verbs that use tidy-select
+
+First attempt:
+
+```{r, eval = FALSE}
+# using a function to select a single variable
+my_select_function <- function(select_variable){
+  gtsummary::trial %>% 
+    dplyr::select(select_variable)
+}
+
+my_select_function(select_variable = trt)
+# Error: object 'trt' not found
+```
+
+---
+
+# Passing unquoted arguments to dplyr verbs that use tidy-select
+
+* Similar to with data-masking functions, `{{ }}` ("curly-curly") allows us to pass unquoted arguments to dplyr verbs
+
+```{r, eval = FALSE}
+# using a function to select a single variable
+my_select_function <- function(select_variable){
+  gtsummary::trial %>% 
+    dplyr::select({{select_variable}})
+}
+
+my_select_function(select_variable = trt)
+# Error: object 'trt' not found
+```
+
+See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
+
+---
+
+# Passing quoted arguments to select()
+
+We need to account for `select()` using tidyselect that by using `any_of()` or `all_of()`
+
+```{r, eval=FALSE}
+my_select_function <- function(select_variable){
+  gtsummary::trial %>% 
+    dplyr::select(all_of(select_variable))
+}
+
+my_select_function(select_variable = "trt")
+# A tibble: 200 x 1
+#   trt   
+#   <chr> 
+# 1 Drug A
+# 2 Drug B
+# etc.
 ```
 
 ---
